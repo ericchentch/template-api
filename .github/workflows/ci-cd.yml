@@ -1,4 +1,4 @@
-name: Forum-api CI/CD
+name: forum-api CI/CD work-flow
 
 env:
   POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL_GITFORUM }}
@@ -28,7 +28,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Build with Maven
+      - name: Test with Maven
         run: mvn test
 
   build:
