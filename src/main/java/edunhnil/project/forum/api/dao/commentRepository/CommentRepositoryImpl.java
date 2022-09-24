@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import edunhnil.project.forum.api.dao.AbstractRepository;
-import edunhnil.project.forum.api.utils.StringUtils;
 
 @Repository
 public class CommentRepositoryImpl extends AbstractRepository implements CommentRepository {
@@ -18,20 +17,8 @@ public class CommentRepositoryImpl extends AbstractRepository implements Comment
         StringBuilder sql = new StringBuilder();
         sql.append(
                 "SELECT * FROM forum.comment c ");
-        sql.append(convertParamsFilterSelectQuery(allParams, Comment.class));
-        if (keySort.trim().compareTo("") != 0 && sortField.trim().compareTo("") != 0) {
-            sql.append(" ORDER BY ").append(StringUtils.camelCaseToSnakeCase(sortField)).append(" ").append(keySort);
-        }
-        sql.append(" OFFSET ").append((page - 1) * pageSize).append(" ROWS FETCH NEXT ").append(pageSize)
-                .append(" ROWS ONLY");
+        sql.append(convertParamsFilterSelectQuery(allParams, Comment.class, page, pageSize, keySort, sortField));
         return replaceQuery(sql.toString(), Comment.class);
-    }
-
-    @Override
-    public Optional<Comment> getCommentById(int id) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT * FROM forum.comment WHERE deleted = 0 AND id = ?");
-        return replaceQueryForObjectWithId(sql.toString(), Comment.class, id);
     }
 
     @Override
@@ -80,7 +67,7 @@ public class CommentRepositoryImpl extends AbstractRepository implements Comment
     public int getTotalCommentAdmin(Map<String, String> allParams) {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(*) FROM forum.comment c ");
-        sql.append(convertParamsFilterSelectQuery(allParams, Comment.class));
+        sql.append(convertParamsFilterSelectQuery(allParams, Comment.class, 0, 0, "", ""));
         return jdbcTemplate.queryForObject(sql.toString(), Integer.class);
     }
 

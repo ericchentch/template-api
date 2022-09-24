@@ -139,13 +139,6 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
     public void forgotPassword(String email) {
         User userCheckMail = repository.getUserByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Email does not exist, please sign up!"));
-        while (true) {
-            String newUsername = CodeGenerator.usernameGenerator();
-            if (!repository.checkUsername(newUsername).isPresent()) {
-                userCheckMail.setUsername(newUsername);
-                break;
-            }
-        }
         String newPassword = CodeGenerator.passwordGenerator();
         userCheckMail
                 .setPassword(

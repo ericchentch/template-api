@@ -6,6 +6,4 @@ import java.util.Optional;
 
 public interface CategoryRepository {
     Optional<List<Category>> getCategories(Map<String, String> allParams);
-
-    Optional<Category> getCategoryById(int id);
 }

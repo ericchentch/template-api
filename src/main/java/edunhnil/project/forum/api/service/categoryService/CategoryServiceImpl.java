@@ -57,8 +57,11 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
 
         @Override
         public Optional<CategoryResponse> getCategoryById(int id) {
-                Category category = repository.getCategoryById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id));
+                Map<String, String> ids = new HashMap<>();
+                ids.put("id", Integer.toString(id));
+                Category category = repository.getCategories(ids)
+                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id))
+                                .get(0);
                 List<String> searchField = new ArrayList<>();
                 searchField.add("category_id");
                 Map<String, String> allParams = new HashMap<String, String>();
@@ -86,8 +89,11 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
 
         @Override
         public Optional<CategoryResponse> getCategoryDetailById(int id) {
-                Category category = repository.getCategoryById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id));
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", Integer.toString(id));
+                Category category = repository.getCategories(allParams)
+                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id))
+                                .get(0);
                 return Optional.of(new CategoryResponse(category.getId(),
                                 category.getCategoryName(),
                                 category.getPath(),

@@ -1,5 +1,6 @@
 package edunhnil.project.forum.api.service.postService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +50,6 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                 .getPostsByAuthorId(allParams, keySort, page, pageSize,
                                                 sortField)
                                 .get();
-
                 return Optional.of(new ListWrapperResponse<PostResponse>(
                                 posts.stream()
                                                 .map(p -> postUtils.generatePostResponse(p, "public"))
@@ -83,29 +83,44 @@ public class PostServiceImpl extends AbstractService<PostRepository>
 
         @Override
         public Optional<PostResponse> getPrivatePost(int id) {
-                Post post = repository.getPrivatePostById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id));
-                return Optional.of(postUtils.generatePostResponse(post, ""));
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
+                return Optional.of(postUtils.generatePostResponse(posts.get(0), ""));
         }
 
         @Override
         public Optional<PostResponse> getPostById(int id) {
-                Post post = repository.getPostById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id));
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
                 repository.oneMoreView(id);
-                return Optional.of(postUtils.generatePostResponse(post, "public"));
+                return Optional.of(postUtils.generatePostResponse(posts.get(0), "public"));
         }
 
         @Override
         public void updatePostById(PostRequest req, int id) {
-                repository.getPrivatePostById(id)
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id));
+                                                id))
+                                .get(0);
                 validate(req);
-                categoryRepository.getCategoryById(req.getCategoryId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category!"));
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", Integer.toString(id));
+                categoryRepository.getCategories(allParams)
+                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id));
                 repository.updatePostById(objectMapper.convertValue(req, Post.class), id);
 
         }
@@ -113,25 +128,34 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         @Override
         public void addNewPost(PostRequest postRequest, String authorId) {
                 validate(postRequest);
-                categoryRepository.getCategoryById(postRequest.getCategoryId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category!"));
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", Integer.toString(postRequest.getCategoryId()));
+                categoryRepository.getCategories(allParams)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Not found category with id:" + postRequest.getCategoryId()));
                 repository.resetId();
                 repository.addNewPost(objectMapper.convertValue(postRequest, Post.class), authorId);
         }
 
         @Override
         public void deletePostById(int id) {
-                repository.getPrivatePostById(id)
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id));
+                                                id))
+                                .get(0);
                 repository.deletePostById(id);
         }
 
         @Override
         public void changeEnabled(int input, int id) {
-                repository.getPrivatePostById(id)
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id));
+                                                id))
+                                .get(0);
                 repository.changeEnabled(input, id);
 
         }

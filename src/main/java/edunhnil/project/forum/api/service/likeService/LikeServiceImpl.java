@@ -1,12 +1,17 @@
 package edunhnil.project.forum.api.service.likeService;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edunhnil.project.forum.api.dao.commentRepository.Comment;
 import edunhnil.project.forum.api.dao.commentRepository.CommentRepository;
 import edunhnil.project.forum.api.dao.likeRepository.LikeRepository;
+import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
@@ -90,14 +95,23 @@ public class LikeServiceImpl extends AbstractService<LikeRepository>
     }
 
     void checkPostId(int postId) {
-        postRepository.getPostById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                        postId));
+        Map<String, String> postIds = new HashMap<>();
+        postIds.put("id", Integer.toString(postId));
+        List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "").get();
+        if (posts.size() == 0) {
+            throw new ResourceNotFoundException("Not found post with id: " +
+                    postId);
+        }
     }
 
     void checkCommentId(int commentId) {
-        commentRepository.getCommentById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found comment with id:" + commentId));
+        Map<String, String> allParams = new HashMap<>();
+        allParams.put("id", Integer.toString(commentId));
+        List<Comment> comments = commentRepository.getAllComment(allParams, "", 0, 0, "")
+                .get();
+        if (comments.size() == 0) {
+            throw new ResourceNotFoundException("Not found comment with id:" + commentId);
+        }
     }
 
     void checkOwnerId(String ownerId) {

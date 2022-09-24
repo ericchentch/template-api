@@ -8,8 +8,6 @@ public interface CommentRepository {
     Optional<List<Comment>> getAllComment(Map<String, String> allParams, String keySort, int page, int pageSize,
             String sortField);
 
-    Optional<Comment> getCommentById(int id);
-
     void addNewComment(Comment comment);
 
     void editCommentById(Comment comment, int id);

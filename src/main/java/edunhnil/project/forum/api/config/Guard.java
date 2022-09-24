@@ -1,5 +1,9 @@
 package edunhnil.project.forum.api.config;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +45,15 @@ public class Guard {
             String id = JwtUtils.getUserIdFromJwt(token, JWT_SECRET);
             User user = userRepository.getUserById(id).orElseThrow(
                     () -> new ResourceNotFoundException("User is deactivated or unauthorized!"));
-            Post post = postRepository.getPostById(postId)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Post is private or deleted!"));
-            return user.get_id().toString().compareTo(post.getAuthorId()) == 0;
+            Map<String, String> postIds = new HashMap<>();
+            postIds.put("id", Integer.toString(postId));
+            List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                    .get();
+            if (posts.size() == 0) {
+                throw new ResourceNotFoundException("Not found post with id: " +
+                        id);
+            }
+            return user.get_id().toString().compareTo(posts.get(0).getAuthorId()) == 0;
         }
         return true;
     }
@@ -55,9 +64,14 @@ public class Guard {
             String id = JwtUtils.getUserIdFromJwt(token, JWT_SECRET);
             User user = userRepository.getUserById(id).orElseThrow(
                     () -> new ResourceNotFoundException("User is deactivated or unauthorized!"));
-            Comment comment = commentRepository.getCommentById(commentId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Comment is deleted!"));
-            return user.get_id().toString().compareTo(comment.getOwnerId()) == 0;
+            Map<String, String> allParams = new HashMap<>();
+            allParams.put("id", Integer.toString(commentId));
+            List<Comment> comments = commentRepository.getAllComment(allParams, "", 0, 0, "")
+                    .get();
+            if (comments.size() == 0) {
+                throw new ResourceNotFoundException("Comment deleted!");
+            }
+            return user.get_id().toString().compareTo(comments.get(0).getOwnerId()) == 0;
         }
         return true;
     }

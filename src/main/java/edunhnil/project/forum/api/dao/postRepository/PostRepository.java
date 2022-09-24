@@ -8,10 +8,6 @@ public interface PostRepository {
         Optional<List<Post>> getPostsByAuthorId(Map<String, String> allParams, String keySort, int page, int pageSize,
                         String sortField);
 
-        Optional<Post> getPostById(int id);
-
-        Optional<Post> getPrivatePostById(int id);
-
         void updatePostById(Post post, int id);
 
         void addNewPost(Post post, String authorId);

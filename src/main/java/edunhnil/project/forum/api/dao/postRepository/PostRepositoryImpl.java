@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import edunhnil.project.forum.api.dao.AbstractRepository;
-import edunhnil.project.forum.api.utils.StringUtils;
 
 @Repository
 public class PostRepositoryImpl extends AbstractRepository implements PostRepository {
@@ -18,29 +17,8 @@ public class PostRepositoryImpl extends AbstractRepository implements PostReposi
         StringBuilder sql = new StringBuilder();
         sql.append(
                 "SELECT * FROM forum.post");
-        sql.append(convertParamsFilterSelectQuery(allParams, Post.class));
-        if (keySort.trim().compareTo("") != 0 && sortField.trim().compareTo("") != 0) {
-            sql.append(" ORDER BY ").append(StringUtils.camelCaseToSnakeCase(sortField)).append(" ").append(keySort);
-        }
-        sql.append(" OFFSET ").append((page - 1) * pageSize).append(" ROWS FETCH NEXT ").append(pageSize)
-                .append(" ROWS ONLY");
+        sql.append(convertParamsFilterSelectQuery(allParams, Post.class, page, pageSize, keySort, sortField));
         return replaceQuery(sql.toString(), Post.class);
-    }
-
-    @Override
-    public Optional<Post> getPostById(int id) {
-        StringBuilder sql = new StringBuilder();
-        sql.append(
-                "SELECT * FROM forum.post WHERE id = ? AND enabled = 0 AND deleted = 0");
-        return replaceQueryForObjectWithId(sql.toString(), Post.class, id);
-    }
-
-    @Override
-    public Optional<Post> getPrivatePostById(int id) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT * FROM forum.post WHERE id = ? AND deleted = 0");
-        return replaceQueryForObjectWithId(sql.toString(), Post.class, id);
-
     }
 
     @Override
@@ -80,7 +58,7 @@ public class PostRepositoryImpl extends AbstractRepository implements PostReposi
     public int getTotalPage(Map<String, String> allParams) {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(*) FROM forum.post p");
-        sql.append(convertParamsFilterSelectQuery(allParams, Post.class));
+        sql.append(convertParamsFilterSelectQuery(allParams, Post.class, 0, 0, "", ""));
         return jdbcTemplate.queryForObject(sql.toString(), Integer.class);
     }
 
