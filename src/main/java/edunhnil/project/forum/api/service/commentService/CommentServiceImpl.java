@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import edunhnil.project.forum.api.dao.commentRepository.Comment;
 import edunhnil.project.forum.api.dao.commentRepository.CommentRepository;
+import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dto.commentDTO.CommentRequest;
 import edunhnil.project.forum.api.dto.commentDTO.CommentResponse;
@@ -36,7 +37,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 allParams.put("postId", Integer.toString(postId));
                 List<Comment> comments = repository
                                 .getAllComment(allParams, keySort, page, 5, sortField)
-                                .orElseThrow(() -> new ResourceNotFoundException("No Comment"));
+                                .get();
                 return Optional.of(new ListWrapperResponse<CommentResponse>(comments.stream()
                                 .map(c -> commentUtils.generateCommentResponse(c, "public"))
                                 .collect(Collectors.toList()), page, 5,
@@ -65,9 +66,13 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         public void addNewComment(CommentRequest commentRequest, int postId, String ownerId) {
                 validate(commentRequest);
                 repository.resetId();
-                postRepository.getPostById(postId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                postId));
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(postId));
+                List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "").get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        postId);
+                }
                 Comment comment = objectMapper.convertValue(commentRequest, Comment.class);
                 comment.setPostId(postId);
                 comment.setOwnerId(ownerId);
@@ -77,16 +82,26 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         @Override
         public void editCommentById(CommentRequest commentRequest, int id) {
                 validate(commentRequest);
-                repository.getCommentById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found comment with id:" + id));
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", Integer.toString(id));
+                List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
+                                .get();
+                if (comments.size() == 0) {
+                        throw new ResourceNotFoundException("Not found comment with id:" + id);
+                }
                 repository.editCommentById(objectMapper.convertValue(commentRequest,
                                 Comment.class), id);
         }
 
         @Override
         public void deleteComment(int id) {
-                repository.getCommentById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found comment with id:" + id));
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", Integer.toString(id));
+                List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
+                                .get();
+                if (comments.size() == 0) {
+                        throw new ResourceNotFoundException("Not found comment with id:" + id);
+                }
                 repository.deleteCommentById(id);
         }
 

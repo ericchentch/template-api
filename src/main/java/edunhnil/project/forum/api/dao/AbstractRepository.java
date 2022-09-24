@@ -9,12 +9,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import edunhnil.project.forum.api.exception.BadSqlException;
 import edunhnil.project.forum.api.log.AppLogger;
 import edunhnil.project.forum.api.log.LoggerFactory;
 import edunhnil.project.forum.api.log.LoggerType;
@@ -38,18 +36,6 @@ public abstract class AbstractRepository {
         }
     }
 
-    protected <T> Optional<T> replaceQueryForObjectWithId(String sql, Class<T> clazz, Object objectInput) {
-        try {
-            T object = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(clazz), objectInput);
-            return Optional.of(object);
-        } catch (BadSqlGrammarException e) {
-            APP_LOGGER.error("ERROR SQL QUERY: " + sql);
-            throw new BadSqlException("Internal Server Error");
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
     protected String generateConditionInQuery(Field field, String value) {
         StringBuilder result = new StringBuilder();
         if (field.getType() == String.class) {
@@ -64,7 +50,9 @@ public abstract class AbstractRepository {
         return result.toString();
     }
 
-    protected String convertParamsFilterSelectQuery(Map<String, String> allParams, Class<?> clazz) {
+    protected String convertParamsFilterSelectQuery(Map<String, String> allParams, Class<?> clazz, int page,
+            int pageSize, String keySort, String sortField) {
+
         Field[] fields = clazz.getDeclaredFields();
         StringBuilder result = new StringBuilder();
         boolean isFirstCondition = true;
@@ -85,6 +73,13 @@ public abstract class AbstractRepository {
                     }
                 }
             }
+        }
+        if (keySort.trim().compareTo("") != 0 && sortField.trim().compareTo("") != 0) {
+            result.append(" ORDER BY ").append(StringUtils.camelCaseToSnakeCase(sortField)).append(" ").append(keySort);
+        }
+        if (pageSize != 0) {
+            result.append(" OFFSET ").append((page - 1) * pageSize).append(" ROWS FETCH NEXT ").append(pageSize)
+                    .append(" ROWS ONLY");
         }
         return result.toString();
     }
