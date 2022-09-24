@@ -1,5 +1,9 @@
 package edunhnil.project.forum.api.dao.fileRepository;
 
+import java.util.Date;
+
+import org.bson.types.ObjectId;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,9 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class File {
-    private int id;
+    private ObjectId _id;
     private String userId;
     private String typeFile;
     private String linkFile;
-    private int createdAt;
+    private Date createdAt;
+    private String deleted;
 }

@@ -1,40 +1,40 @@
 package edunhnil.project.forum.api.dao.fileRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import edunhnil.project.forum.api.dao.AbstractRepository;
-
+import edunhnil.project.forum.api.dao.AbstractMongoRepository;
 @Repository
-public class FileRepositoryImpl extends AbstractRepository implements FileRepository {
+public class FileRepositoryImpl extends AbstractMongoRepository implements FileRepository {
 
     @Override
-    public void createFile(File file) {
+    public void saveFile(File file) {
+        authenticationTemplate.save(file);
+    }
+
+    // @Override
+    // public void deleteFile(File file) {
+    //     // TODO Auto-generated method stub
+    //     authenticationTemplate.save(file);
+    // }
+
+    @Override
+    public Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize) {
         // TODO Auto-generated method stub
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO forum.files (userId, typeFile, linkFile, createdAt)");
-        sql.append("VALUES (?,?,?,?)");
-        jdbcTemplate.update(sql.toString(), file.getUserId(), file.getTypeFile(), file.getLinkFile(), file.getCreatedAt());
+        Query query = generateQueryMongoDB(allParams, File.class, "", "", page, pageSize);
+        Optional<List<File>> total = replaceFind(query, File.class);
+        return total;
     }
 
     @Override
-    public Optional<File> getFile(String id) {
+    public Optional<File> getFileById(String _id) {
         // TODO Auto-generated method stub
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<List<File>> getFileByUserId(String userId) {
-        // TODO Auto-generated method stub
-        return Optional.empty();
-    }
-
-    @Override
-    public void deleteFile(String id) {
-        // TODO Auto-generated method stub
-        
+        File file = authenticationTemplate.findById(_id, File.class);
+        return Optional.of(file);
     }
     
 }

@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.dto.fileDTO;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class FileResponse {
     private String id;
     private String userId;
-    private FileEnum typeFile;
+    private String typeFile;
     private String linkFile;
-    private int createdAt;
+    private Date createdAt;
 }
