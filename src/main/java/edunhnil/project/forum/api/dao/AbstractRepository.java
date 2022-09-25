@@ -43,9 +43,14 @@ public abstract class AbstractRepository {
                     .append(" ILIKE '%").append(value.toLowerCase()).append("%'");
         }
         if (field.getType() == int.class) {
-            result.append(StringUtils.camelCaseToSnakeCase(field.getName()))
-                    .append(" = ")
-                    .append(value.toLowerCase());
+            try {
+                int intValue = Integer.parseInt(value);
+                result.append(StringUtils.camelCaseToSnakeCase(field.getName()))
+                        .append(" = ")
+                        .append(intValue);
+            } catch (Exception e) {
+                APP_LOGGER.error("error parsing int value");
+            }
         }
         return result.toString();
     }
