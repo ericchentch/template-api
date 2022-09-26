@@ -45,7 +45,28 @@ public abstract class AbstractMongoRepository {
                                 throw new BadSqlException("id must be objectId format!");
                             }
                         }
-                    } else {
+                    }
+                    if (field.getType() == Boolean.class) {
+                        for (int i = 0; i < values.length; i++) {
+                            try {
+                                boolean value = Boolean.parseBoolean(values[i]);
+                                query.addCriteria(Criteria.where(items.getKey()).is(value));
+                            } catch (Exception e) {
+                                APP_LOGGER.error("error parsing value boolean");
+                            }
+                        }
+                    }
+                    if (field.getType() == int.class) {
+                        for (int i = 0; i < values.length; i++) {
+                            try {
+                                int value = Integer.parseInt(values[i]);
+                                query.addCriteria(Criteria.where(items.getKey()).is(value));
+                            } catch (Exception e) {
+                                APP_LOGGER.error("error parsing value int");
+                            }
+                        }
+                    }
+                    if (field.getType() == String.class) {
                         for (int i = 0; i < values.length; i++) {
                             query.addCriteria(Criteria.where(items.getKey()).is(values[i]));
                         }
