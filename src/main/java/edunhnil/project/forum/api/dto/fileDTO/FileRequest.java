@@ -31,10 +31,4 @@ public class FileRequest {
     @NotBlank(message = "Link is required")
     @NotNull(message = "Link is required")
     private String linkFile;
-    
-    @Schema(type = "number", defaultValue = "100")
-    @NotEmpty(message = "Created time is required")
-    @NotBlank(message = "Created time is required")
-    @NotNull(message = "Created time is required")
-    private int createdAt;
 }
