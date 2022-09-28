@@ -17,23 +17,30 @@ import edunhnil.project.forum.api.service.fileService.FileService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
-@RequestMapping(value = "file-controller")
+@RequestMapping(value = "files-controller")
 public class FileController extends AbstractController<FileService> {
-    @PostMapping(value = "create-file")
+    @PostMapping(value = "user/create-file")
     @SecurityRequirement(name = "Bearer Authentication")
     void createFile(@RequestBody FileRequest fileRequest) {
         service.createFile(fileRequest);
     }
 
-    @GetMapping(value = "get-files-by-user-id")
+    @GetMapping(value = "user/get-files-by-user-id")
     @SecurityRequirement(name = "Bearer Authentication")
     ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(String userId) {
         return response(service.getFilesByUserId(userId), "Success");
     }
+    
+    @GetMapping(value = "user/get-file-by-id")
+    @SecurityRequirement(name = "Bearer Authentication")
+    ResponseEntity<CommonResponse<FileResponse>> getFilesByFileId(String fileId) {
+        return response(service.getFileById(fileId), "Success");
+    }
 
-    @DeleteMapping(value = "delete-file/{_id}")
+    @DeleteMapping(value = "user/delete-file/{_id}")
     @SecurityRequirement(name = "Bear Authentication")
-    void deleteFile(@PathVariable String _id) {
+    String deleteFile(@PathVariable String _id) {
         service.deleteFile(_id);
+        return "Success";
     }
 }

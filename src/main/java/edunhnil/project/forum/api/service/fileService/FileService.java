@@ -11,4 +11,5 @@ public interface FileService {
     void createFile(FileRequest fileRequest);
     void deleteFile(String _id);
     Optional<ListWrapperResponse<FileResponse>>  getFilesByUserId(String userId);
+    Optional<FileResponse> getFileById(String fileId);
 }

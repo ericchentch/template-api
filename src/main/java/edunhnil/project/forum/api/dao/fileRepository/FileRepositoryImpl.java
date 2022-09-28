@@ -34,7 +34,7 @@ public class FileRepositoryImpl extends AbstractMongoRepository implements FileR
     public Optional<File> getFileById(String _id) {
         // TODO Auto-generated method stub
         File file = authenticationTemplate.findById(_id, File.class);
-        return Optional.of(file);
+        return Optional.ofNullable(file);
     }
     
 }

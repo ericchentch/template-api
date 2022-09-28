@@ -63,5 +63,14 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
         ));
     }
 
-    
+    @Override
+    public Optional<FileResponse> getFileById(String fileId) {
+        // TODO Auto-generated method stub
+        File file = repository.getFileById(fileId).orElseThrow(
+            () -> new ResourceNotFoundException("Not found file with id: " + fileId));
+
+        FileResponse result = fileUtils.generateFileResponse(file);
+
+        return Optional.of(result);
+    }
 }
