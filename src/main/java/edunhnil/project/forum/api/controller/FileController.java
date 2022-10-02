@@ -25,15 +25,15 @@ public class FileController extends AbstractController<FileService> {
         service.createFile(fileRequest);
     }
 
-    @GetMapping(value = "user/get-files-by-user-id")
+    @GetMapping(value = "user/get-files/{userId}")
     @SecurityRequirement(name = "Bearer Authentication")
-    ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(String userId) {
+    ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(@PathVariable String userId) {
         return response(service.getFilesByUserId(userId), "Success");
     }
     
-    @GetMapping(value = "user/get-file-by-id")
+    @GetMapping(value = "user/get-file/{fileId}")
     @SecurityRequirement(name = "Bearer Authentication")
-    ResponseEntity<CommonResponse<FileResponse>> getFilesByFileId(String fileId) {
+    ResponseEntity<CommonResponse<FileResponse>> getFilesByFileId(@PathVariable String fileId) {
         return response(service.getFileById(fileId), "Success");
     }
 

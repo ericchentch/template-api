@@ -8,10 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import ch.qos.logback.core.util.FileUtil;
 import edunhnil.project.forum.api.dao.fileRepository.File;
 import edunhnil.project.forum.api.dao.fileRepository.FileRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
