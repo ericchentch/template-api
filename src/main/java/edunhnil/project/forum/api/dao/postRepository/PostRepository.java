@@ -8,17 +8,7 @@ public interface PostRepository {
         Optional<List<Post>> getPostsByAuthorId(Map<String, String> allParams, String keySort, int page, int pageSize,
                         String sortField);
 
-        void updatePostById(Post post, int id);
-
-        void addNewPost(Post post, String authorId);
-
-        void deletePostById(int id);
-
-        void changeEnabled(int input, int id);
-
-        void oneMoreView(int id);
+        void savePost(Post post);
 
         int getTotalPage(Map<String, String> allParams);
-
-        void resetId();
 }

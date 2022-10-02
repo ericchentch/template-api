@@ -19,6 +19,7 @@ import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
 import edunhnil.project.forum.api.utils.CommentUtils;
+import edunhnil.project.forum.api.utils.DateFormat;
 
 @Service
 public class CommentServiceImpl extends AbstractService<CommentRepository>
@@ -41,7 +42,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 return Optional.of(new ListWrapperResponse<CommentResponse>(comments.stream()
                                 .map(c -> commentUtils.generateCommentResponse(c, "public"))
                                 .collect(Collectors.toList()), page, 5,
-                                repository.getTotalCommentPost(postId)));
+                                repository.getTotalCommentPost(allParams)));
         }
 
         @Override
@@ -59,13 +60,12 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                                                                                 ""))
                                                                 .collect(Collectors.toList()),
                                                 page, pageSize,
-                                                repository.getTotalCommentAdmin(allParams)));
+                                                repository.getTotalCommentPost(allParams)));
         }
 
         @Override
         public void addNewComment(CommentRequest commentRequest, int postId, String ownerId) {
                 validate(commentRequest);
-                repository.resetId();
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(postId));
                 List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "").get();
@@ -76,7 +76,9 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 Comment comment = objectMapper.convertValue(commentRequest, Comment.class);
                 comment.setPostId(postId);
                 comment.setOwnerId(ownerId);
-                repository.addNewComment(comment);
+                comment.setCreated(DateFormat.getCurrentTime());
+                comment.setDeleted(0);
+                repository.saveComment(comment);
         }
 
         @Override
@@ -89,8 +91,10 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 if (comments.size() == 0) {
                         throw new ResourceNotFoundException("Not found comment with id:" + id);
                 }
-                repository.editCommentById(objectMapper.convertValue(commentRequest,
-                                Comment.class), id);
+                Comment comment = objectMapper.convertValue(comments.get(0), Comment.class);
+                comment.setContent(commentRequest.getContent());
+                comment.setModified(DateFormat.getCurrentTime());
+                repository.saveComment(comment);
         }
 
         @Override
@@ -102,7 +106,10 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 if (comments.size() == 0) {
                         throw new ResourceNotFoundException("Not found comment with id:" + id);
                 }
-                repository.deleteCommentById(id);
+                Comment comment = comments.get(0);
+                comment.setDeleted(0);
+                comment.setModified(DateFormat.getCurrentTime());
+                repository.saveComment(comment);
         }
 
 }

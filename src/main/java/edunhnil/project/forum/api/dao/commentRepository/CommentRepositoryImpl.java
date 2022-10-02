@@ -22,53 +22,14 @@ public class CommentRepositoryImpl extends AbstractRepository implements Comment
     }
 
     @Override
-    public void addNewComment(Comment comment) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO forum.comment (owner_id, post_id, content)");
-        sql.append(" VALUES (?, ? ,?)");
-        jdbcTemplate.update(sql.toString(), comment.getOwnerId(), comment.getPostId(), comment.getContent());
+    public void saveComment(Comment comment) {
+        String[] ignores = { "id", "modified" };
+        save(comment, ignores);
     }
 
     @Override
-    public void editCommentById(Comment comment, int id) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("UPDATE forum.comment SET content=?, modified = now()");
-        sql.append(" WHERE id = ?");
-        jdbcTemplate.update(sql.toString(), comment.getContent(), id);
-    }
-
-    @Override
-    public void deleteCommentById(int id) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("UPDATE forum.comment SET deleted = 1, modified = now()");
-        sql.append(" WHERE id = ?");
-        jdbcTemplate.update(sql.toString(), id);
-
-    }
-
-    @Override
-    public void resetId() {
-        int max = getMax("SELECT MAX(id) FROM forum.comment") + 1;
-        String sql = "ALTER SEQUENCE forum.comment_id_seq RESTART WITH "
-                + max;
-        jdbcTemplate.execute(sql);
-
-    }
-
-    @Override
-    public int getTotalCommentPost(int postId) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM forum.comment c");
-        sql.append(" WHERE c.deleted = 0 AND c.post_id = " + postId);
-        return jdbcTemplate.queryForObject(sql.toString(), Integer.class);
-    }
-
-    @Override
-    public int getTotalCommentAdmin(Map<String, String> allParams) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM forum.comment c ");
-        sql.append(convertParamsFilterSelectQuery(allParams, Comment.class, 0, 0, "", ""));
-        return jdbcTemplate.queryForObject(sql.toString(), Integer.class);
+    public int getTotalCommentPost(Map<String, String> allParams) {
+        return getTotal(allParams, Comment.class);
     }
 
 }

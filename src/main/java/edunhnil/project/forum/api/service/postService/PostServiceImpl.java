@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edunhnil.project.forum.api.dao.categoryRepository.Category;
 import edunhnil.project.forum.api.dao.categoryRepository.CategoryRepository;
 import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.postRepository.PostRepository;
@@ -17,6 +18,7 @@ import edunhnil.project.forum.api.dto.postDTO.PostRequest;
 import edunhnil.project.forum.api.dto.postDTO.PostResponse;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
+import edunhnil.project.forum.api.utils.DateFormat;
 import edunhnil.project.forum.api.utils.PostUtils;
 
 @Service
@@ -67,7 +69,6 @@ public class PostServiceImpl extends AbstractService<PostRepository>
 
                 } else {
                         allParams.put("authorId", authorId);
-
                 }
                 List<Post> posts = repository
                                 .getPostsByAuthorId(allParams, keySort, page, pageSize,
@@ -104,24 +105,35 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                         throw new ResourceNotFoundException("Not found post with id: " +
                                         id);
                 }
-                repository.oneMoreView(id);
-                return Optional.of(postUtils.generatePostResponse(posts.get(0), "public"));
+                Post post = posts.get(0);
+                post.setView(post.getView() + 1);
+                return Optional.of(postUtils.generatePostResponse(post, "public"));
         }
 
         @Override
         public void updatePostById(PostRequest req, int id) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
-                repository.getPostsByAuthorId(postIds, "", 0, 0, "")
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id))
-                                .get(0);
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
+                Post post = posts.get(0);
                 validate(req);
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", Integer.toString(id));
-                categoryRepository.getCategories(allParams)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id));
-                repository.updatePostById(objectMapper.convertValue(req, Post.class), id);
+                List<Category> categories = categoryRepository.getCategories(allParams).get();
+                if (categories.size() == 0) {
+                        throw new ResourceNotFoundException(
+                                        "Not found category with id:" + req.getCategoryId());
+                }
+                post.setTitle(req.getTitle());
+                post.setModified(DateFormat.getCurrentTime());
+                post.setContent(req.getContent());
+                post.setCategoryId(req.getCategoryId());
+                repository.savePost(post);
 
         }
 
@@ -130,34 +142,49 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 validate(postRequest);
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", Integer.toString(postRequest.getCategoryId()));
-                categoryRepository.getCategories(allParams)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Not found category with id:" + postRequest.getCategoryId()));
-                repository.resetId();
-                repository.addNewPost(objectMapper.convertValue(postRequest, Post.class), authorId);
+                List<Category> categories = categoryRepository.getCategories(allParams).get();
+                if (categories.size() == 0) {
+                        throw new ResourceNotFoundException(
+                                        "Not found category with id:" + postRequest.getCategoryId());
+                }
+                Post post = objectMapper.convertValue(postRequest, Post.class);
+                post.setAuthorId(authorId);
+                post.setCreated(DateFormat.getCurrentTime());
+                post.setDeleted(0);
+                post.setView(0);
+                repository.savePost(post);
         }
 
         @Override
         public void deletePostById(int id) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
-                repository.getPostsByAuthorId(postIds, "", 0, 0, "")
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id))
-                                .get(0);
-                repository.deletePostById(id);
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
+                Post post = posts.get(0);
+                post.setModified(DateFormat.getCurrentTime());
+                post.setDeleted(1);
+                repository.savePost(post);
         }
 
         @Override
         public void changeEnabled(int input, int id) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
-                repository.getPostsByAuthorId(postIds, "", 0, 0, "")
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " +
-                                                id))
-                                .get(0);
-                repository.changeEnabled(input, id);
-
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
+                Post post = posts.get(0);
+                post.setEnabled(input);
+                post.setModified(DateFormat.getCurrentTime());
+                repository.savePost(post);
         }
 
 }

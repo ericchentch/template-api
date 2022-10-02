@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
 import edunhnil.project.forum.api.exception.BadSqlException;
+import edunhnil.project.forum.api.exception.InternalServerException;
 import edunhnil.project.forum.api.exception.InvalidDateFormat;
 import edunhnil.project.forum.api.exception.InvalidPasswordException;
 import edunhnil.project.forum.api.exception.InvalidRequestException;
@@ -108,4 +109,11 @@ public class CustomExceptionHandler {
                 HttpStatus.OK.value());
     }
 
+    @ExceptionHandler(InternalServerException.class)
+    public ResponseEntity<CommonResponse<String>> handleInternalServerError(InternalServerException e) {
+        APP_LOGGER.error(e.getMessage());
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(false, null, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()), null,
+                HttpStatus.OK.value());
+    }
 }
