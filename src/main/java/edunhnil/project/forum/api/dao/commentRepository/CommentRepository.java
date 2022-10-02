@@ -8,15 +8,8 @@ public interface CommentRepository {
     Optional<List<Comment>> getAllComment(Map<String, String> allParams, String keySort, int page, int pageSize,
             String sortField);
 
-    void addNewComment(Comment comment);
+    void saveComment(Comment comment);
 
-    void editCommentById(Comment comment, int id);
+    int getTotalCommentPost(Map<String, String> allParams);
 
-    void deleteCommentById(int id);
-
-    void resetId();
-
-    int getTotalCommentPost(int postId);
-
-    int getTotalCommentAdmin(Map<String, String> allParams);
 }
