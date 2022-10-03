@@ -1,5 +1,8 @@
 package edunhnil.project.forum.api.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +24,14 @@ public class CommentUtils {
 
     public CommentResponse generateCommentResponse(Comment c, String type) {
         UserResponse ownerInformation = userService.getPublicUserById(c.getOwnerId()).get();
+        Map<String, String> allParams = new HashMap<>();
+        allParams.put("targetId", Integer.toString(c.getId()));
+        allParams.put("type", "comment");
         if (type.compareTo("public") == 0) {
             return new CommentResponse(c.getId(), c.getOwnerId(),
                     ownerInformation,
                     c.getPostId(),
-                    c.getContent(), likeRepository.getTotalCommentLike(c.getId()),
+                    c.getContent(), likeRepository.getTotalLike(allParams),
                     DateFormat.toDateString(c.getCreated(), DateTime.YYYY_MM_DD),
                     DateFormat.toDateString(c.getModified(), DateTime.YYYY_MM_DD),
                     0);
@@ -33,7 +39,7 @@ public class CommentUtils {
             return new CommentResponse(c.getId(), c.getOwnerId(),
                     ownerInformation,
                     c.getPostId(),
-                    c.getContent(), likeRepository.getTotalCommentLike(c.getId()),
+                    c.getContent(), likeRepository.getTotalLike(allParams),
                     DateFormat.toDateString(c.getCreated(), DateTime.YYYY_MM_DD),
                     DateFormat.toDateString(c.getModified(), DateTime.YYYY_MM_DD),
                     0);

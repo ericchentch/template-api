@@ -36,6 +36,8 @@ public class LoginController extends AbstractController<LoginService> {
         @PostMapping(value = "logout")
         public ResponseEntity<CommonResponse<String>> logout(HttpServletRequest request) {
                 validateToken(request);
+                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.logout(id);
