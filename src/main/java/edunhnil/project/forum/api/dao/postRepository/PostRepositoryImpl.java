@@ -18,7 +18,6 @@ public class PostRepositoryImpl extends AbstractRepository implements PostReposi
         sql.append(
                 "SELECT * FROM forum.post");
         sql.append(convertParamsFilterSelectQuery(allParams, Post.class, page, pageSize, keySort, sortField));
-        System.out.println(sql.toString());
         return replaceQuery(sql.toString(), Post.class);
     }
 

@@ -10,13 +10,13 @@ import edunhnil.project.forum.api.dto.postDTO.PostResponse;
 public interface PostService {
         Optional<ListWrapperResponse<PostResponse>> getPostsByAuthorId(Map<String, String> allParams,
                         String keySort, int page,
-                        int pageSize, String sortField, String authorId);
+                        int pageSize, String sortField, String loginId);
 
         Optional<ListWrapperResponse<PostResponse>> getPublicPost(Map<String, String> allParams,
                         String keySort, int page,
                         int pageSize, String sortField);
 
-        Optional<PostResponse> getPrivatePost(int id);
+        Optional<PostResponse> getPrivatePost(int id, String loginId);
 
         Optional<PostResponse> getPostById(int id);
 

@@ -43,7 +43,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                         .getPostsByAuthorId(allParams, "DESC", 1, 10, "created")
                                         .orElseThrow(() -> new ResourceNotFoundException("Not found any post"));
                         if (posts.size() != 0) {
-                                PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public");
+                                PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public", "");
                                 result.add(new CategoryResponse(c.getId(), c.getCategoryName(), c.getPath(),
                                                 posts.size(), newestPost));
                         } else {
@@ -51,8 +51,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                                 posts.size(), null));
                         }
                 }
-                return Optional
-                                .of(result);
+                return Optional.of(result);
         }
 
         @Override
@@ -72,13 +71,12 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                 10, "created")
                                 .get();
                 if (posts.size() != 0) {
-                        PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public");
+                        PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public", "");
                         return Optional.of(new CategoryResponse(category.getId(),
                                         category.getCategoryName(),
                                         category.getPath(),
                                         posts.size(),
                                         newestPost));
-
                 } else {
                         return Optional.of(new CategoryResponse(category.getId(),
                                         category.getCategoryName(),

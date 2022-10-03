@@ -3,12 +3,12 @@ package edunhnil.project.forum.api.exception.handler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
 import edunhnil.project.forum.api.exception.BadSqlException;
+import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.InternalServerException;
 import edunhnil.project.forum.api.exception.InvalidDateFormat;
 import edunhnil.project.forum.api.exception.InvalidPasswordException;
@@ -93,8 +93,8 @@ public class CustomExceptionHandler {
                 HttpStatus.OK.value());
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<CommonResponse<String>> handleForbidden(AuthenticationException e) {
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<CommonResponse<String>> handleForbidden(ForbiddenException e) {
         APP_LOGGER.error(e.getMessage());
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(false, null, "Access denied!", HttpStatus.FORBIDDEN.value()), null,

@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostLike {
+public class Like {
     private int id;
     private String ownerId;
-    private int postId;
+    private int targetId;
+    private String type;
     private Date created;
+    private int deleted;
 }

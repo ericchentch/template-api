@@ -3,19 +3,20 @@ package edunhnil.project.forum.api.service.likeService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edunhnil.project.forum.api.dao.commentRepository.Comment;
 import edunhnil.project.forum.api.dao.commentRepository.CommentRepository;
+import edunhnil.project.forum.api.dao.likeRepository.Like;
 import edunhnil.project.forum.api.dao.likeRepository.LikeRepository;
 import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
+import edunhnil.project.forum.api.utils.DateFormat;
 
 @Service
 public class LikeServiceImpl extends AbstractService<LikeRepository>
@@ -31,66 +32,40 @@ public class LikeServiceImpl extends AbstractService<LikeRepository>
     private CommentRepository commentRepository;
 
     @Override
-    public Optional<Integer> getTotalPostLike(int postId) {
-        checkPostId(postId);
-        return Optional.of(repository.getTotalPostLike(postId));
-    }
-
-    @Override
-    public Optional<Integer> getTotalCommentLike(int commentId) {
-        checkCommentId(commentId);
-        return Optional.of(repository.getTotalCommentLike(commentId));
-    }
-
-    @Override
-    public Optional<Boolean> checkLikeComment(int commentId, String ownerId) {
-        checkCommentId(commentId);
-        checkOwnerId(ownerId);
-        return Optional.of(repository.checkLikeComment(commentId, ownerId));
-    }
-
-    @Override
-    public Optional<Boolean> checkLikePost(int postId, String ownerId) {
-        checkPostId(postId);
-        checkOwnerId(ownerId);
-        return Optional.of(repository.checkLikePost(postId, ownerId));
-    }
-
-    @Override
-    public void addNewCommentLike(String ownerId, int commentId) {
+    public void saveCommentLike(String ownerId, int commentId) {
         checkOwnerId(ownerId);
         checkCommentId(commentId);
-        repository.resetIdComment();
-        if (!repository.checkLikeComment(commentId, ownerId)) {
-            repository.addNewCommentLike(ownerId, commentId);
+        Map<String, String> allParams = new HashMap<>();
+        allParams.put("ownerId", ownerId);
+        allParams.put("targetId", Integer.toString(commentId));
+        allParams.put("type", "comment");
+        List<Like> likes = repository.getLikes(allParams).get();
+        if (likes.size() > 0) {
+            Like like = likes.get(0);
+            like.setDeleted(1);
+            repository.updateLike(like);
+        } else {
+            Like like = new Like(0, ownerId, commentId, "comment", DateFormat.getCurrentTime(), 0);
+            repository.updateLike(like);
         }
     }
 
     @Override
-    public void addNewPostLike(String ownerId, int postId) {
+    public void savePostLike(String ownerId, int postId) {
         checkOwnerId(ownerId);
         checkPostId(postId);
-        repository.resetIdPost();
-        if (!repository.checkLikePost(postId, ownerId)) {
-            repository.addNewPostId(ownerId, postId);
-        }
-    }
-
-    @Override
-    public void hideLikePost(String ownerId, int postId) {
-        checkOwnerId(ownerId);
-        checkPostId(postId);
-        if (repository.checkLikePost(postId, ownerId)) {
-            repository.hideLikePost(ownerId, postId);
-        }
-    }
-
-    @Override
-    public void hideCommentLike(String ownerId, int commentId) {
-        checkOwnerId(ownerId);
-        checkCommentId(commentId);
-        if (repository.checkLikeComment(commentId, ownerId)) {
-            repository.hideCommentLike(ownerId, commentId);
+        Map<String, String> allParams = new HashMap<>();
+        allParams.put("ownerId", ownerId);
+        allParams.put("targetId", Integer.toString(postId));
+        allParams.put("type", "post");
+        List<Like> likes = repository.getLikes(allParams).get();
+        if (likes.size() > 0) {
+            Like like = likes.get(0);
+            like.setDeleted(1);
+            repository.updateLike(like);
+        } else {
+            Like like = new Like(0, ownerId, postId, "post", DateFormat.getCurrentTime(), 0);
+            repository.updateLike(like);
         }
     }
 

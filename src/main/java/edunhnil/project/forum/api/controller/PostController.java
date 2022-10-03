@@ -40,10 +40,12 @@ public class PostController extends AbstractController<PostService> {
             @RequestParam(defaultValue = "modified") String sortField,
             @RequestParam Map<String, String> allParams, HttpServletRequest request) {
         validateToken(request);
-        String authorId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
+        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                 JWT_SECRET);
         return response(service.getPostsByAuthorId(allParams, keySort, page,
-                pageSize, sortField, authorId),
+                pageSize, sortField, loginId),
                 "Get list of posts successfully!");
     }
 
@@ -64,7 +66,11 @@ public class PostController extends AbstractController<PostService> {
     public ResponseEntity<CommonResponse<PostResponse>> getPostAdmin(@PathVariable int postId,
             HttpServletRequest request) {
         validateToken(request);
-        return response(service.getPrivatePost(postId), "Get post successfully!");
+        String[] roles = { "ROLE_ADMIN" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
+        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                JWT_SECRET);
+        return response(service.getPrivatePost(postId, loginId), "Get post successfully!");
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -72,7 +78,11 @@ public class PostController extends AbstractController<PostService> {
     public ResponseEntity<CommonResponse<PostResponse>> getPostUser(@PathVariable int postId,
             HttpServletRequest request) {
         validateToken(request);
-        return response(service.getPrivatePost(postId), "Get post successfully!");
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
+        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                JWT_SECRET);
+        return response(service.getPrivatePost(postId, loginId), "Get post successfully!");
     }
 
     @GetMapping(value = "public/getPost/{postId}")
@@ -85,6 +95,8 @@ public class PostController extends AbstractController<PostService> {
     public void addNewPost(@RequestBody PostRequest postRequest,
             HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                 JWT_SECRET);
         service.addNewPost(postRequest, id);
@@ -95,6 +107,8 @@ public class PostController extends AbstractController<PostService> {
     public void updatePost(@PathVariable int postId, @RequestBody PostRequest postUpdateReq,
             HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
         service.updatePostById(postUpdateReq, postId);
     }
 
@@ -102,6 +116,8 @@ public class PostController extends AbstractController<PostService> {
     @DeleteMapping(value = "admin/deletePost/{postId}")
     public void deletePostAdmin(@PathVariable int postId, HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         service.deletePostById(postId);
     }
 
@@ -109,6 +125,8 @@ public class PostController extends AbstractController<PostService> {
     @DeleteMapping(value = "user/deletePost/{postId}")
     public void deletePostUser(@PathVariable int postId, HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
         service.deletePostById(postId);
     }
 
@@ -118,6 +136,8 @@ public class PostController extends AbstractController<PostService> {
             @RequestParam(required = true, defaultValue = "0") int input,
             HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "", roles);
         service.changeEnabled(input, postId);
     }
 
@@ -127,6 +147,8 @@ public class PostController extends AbstractController<PostService> {
             @RequestParam(required = true, defaultValue = "0") int input,
             HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
         service.changeEnabled(input, postId);
     }
 

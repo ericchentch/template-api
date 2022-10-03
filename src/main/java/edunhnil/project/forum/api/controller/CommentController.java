@@ -49,31 +49,32 @@ public class CommentController extends AbstractController<CommentService> {
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "asc") String keySort,
             @RequestParam(defaultValue = "modified") String sortField,
-            @RequestParam Map<String, String> allParams,
-            HttpServletRequest request) {
+            @RequestParam Map<String, String> allParams, HttpServletRequest request) {
         validateToken(request);
-        return response(service.getAdminComment(allParams, keySort, page, pageSize,
-                sortField),
+        String[] roles = { "ROLE_ADMIN" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
+        return response(service.getAdminComment(allParams, keySort, page, pageSize, sortField),
                 "Get list of comments successfully!");
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping(value = "user/addNewComment/{postId}")
-    public void addNewComment(@RequestBody CommentRequest commentRequest,
-            HttpServletRequest request,
+    public void addNewComment(@RequestBody CommentRequest commentRequest, HttpServletRequest request,
             @PathVariable int postId) {
         validateToken(request);
-        String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                JWT_SECRET);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
+        String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
         service.addNewComment(commentRequest, postId, id);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping(value = "user/editComment/{commentId}")
-    public void editComment(@RequestBody CommentRequest commentRequest,
-            HttpServletRequest request,
+    public void editComment(@RequestBody CommentRequest commentRequest, HttpServletRequest request,
             @PathVariable int commentId) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("comment", JwtUtils.getJwtFromRequest(request), Integer.toString(commentId), roles);
         service.editCommentById(commentRequest, commentId);
     }
 
@@ -81,14 +82,17 @@ public class CommentController extends AbstractController<CommentService> {
     @DeleteMapping(value = "user/deleteComment/{commentId}")
     public void userDeleteComment(@PathVariable int commentId, HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("comment", JwtUtils.getJwtFromRequest(request), Integer.toString(commentId), roles);
         service.deleteComment(commentId);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping(value = "admin/deleteComment/{commentId}")
-    public void adminDeleteComment(@PathVariable int commentId,
-            HttpServletRequest request) {
+    public void adminDeleteComment(@PathVariable int commentId, HttpServletRequest request) {
         validateToken(request);
+        String[] roles = { "ROLE_ADMIN" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         service.deleteComment(commentId);
     }
 }

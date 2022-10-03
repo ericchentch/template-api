@@ -25,6 +25,8 @@ import edunhnil.project.forum.api.utils.PostUtils;
 public class PostServiceImpl extends AbstractService<PostRepository>
                 implements PostService {
 
+        public static String publicCondition;
+
         @Autowired
         private CategoryRepository categoryRepository;
 
@@ -54,7 +56,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                 .get();
                 return Optional.of(new ListWrapperResponse<PostResponse>(
                                 posts.stream()
-                                                .map(p -> postUtils.generatePostResponse(p, "public"))
+                                                .map(p -> postUtils.generatePostResponse(p, "public", ""))
                                                 .collect(Collectors.toList()),
                                 page, pageSize,
                                 repository.getTotalPage(allParams)));
@@ -63,36 +65,32 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         @Override
         public Optional<ListWrapperResponse<PostResponse>> getPostsByAuthorId(Map<String, String> allParams,
                         String keySort, int page,
-                        int pageSize, String sortField, String authorId) {
-                if (allParams.containsKey("authorId")) {
-                        allParams.replace("authorId", authorId);
-
-                } else {
-                        allParams.put("authorId", authorId);
-                }
+                        int pageSize, String sortField, String loginId) {
+                changePublic(allParams, loginId, "authorId");
                 List<Post> posts = repository
                                 .getPostsByAuthorId(allParams, keySort, page, pageSize,
                                                 sortField)
                                 .orElseThrow(() -> new ResourceNotFoundException("No post"));
-
                 return Optional.of(new ListWrapperResponse<PostResponse>(
                                 posts.stream()
-                                                .map(p -> postUtils.generatePostResponse(p, "public"))
+                                                .map(p -> postUtils.generatePostResponse(p, publicCondition,
+                                                                loginId))
                                                 .collect(Collectors.toList()),
                                 page, pageSize, repository.getTotalPage(allParams)));
         }
 
         @Override
-        public Optional<PostResponse> getPrivatePost(int id) {
+        public Optional<PostResponse> getPrivatePost(int id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
+                changePublic(postIds, loginId, "id");
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
                         throw new ResourceNotFoundException("Not found post with id: " +
                                         id);
                 }
-                return Optional.of(postUtils.generatePostResponse(posts.get(0), ""));
+                return Optional.of(postUtils.generatePostResponse(posts.get(0), "", loginId));
         }
 
         @Override
@@ -107,7 +105,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 }
                 Post post = posts.get(0);
                 post.setView(post.getView() + 1);
-                return Optional.of(postUtils.generatePostResponse(post, "public"));
+                return Optional.of(postUtils.generatePostResponse(post, "public", ""));
         }
 
         @Override
@@ -187,4 +185,13 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 repository.savePost(post);
         }
 
+        private void changePublic(Map<String, String> allParams, String loginId, String compareKey) {
+                if (allParams.containsKey(compareKey)) {
+                        if (allParams.get(compareKey).compareTo(loginId) == 0)
+                                publicCondition = "";
+                        else
+                                publicCondition = "public";
+                } else
+                        publicCondition = "public";
+        }
 }
