@@ -28,7 +28,6 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
 
     @Override
     public void createFile(FileRequest fileRequest) {
-        // TODO Auto-generated method stub
         File file = objectMapper.convertValue(fileRequest, File.class);
         file.setDeleted("false");
         file.setCreatedAt(DateFormat.getCurrentTime());
@@ -44,7 +43,6 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
 
     @Override
     public Optional<ListWrapperResponse<FileResponse>> getFilesByUserId(String userId) {
-        // TODO Auto-generated method stub
         Map<String, String> allParams = Map.ofEntries(
                     Map.entry("userId", userId),
                     Map.entry("deleted", "false")
@@ -63,7 +61,6 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
 
     @Override
     public Optional<FileResponse> getFileById(String fileId) {
-        // TODO Auto-generated method stub
         File file = repository.getFileById(fileId).orElseThrow(
             () -> new ResourceNotFoundException("Not found file with id: " + fileId));
 

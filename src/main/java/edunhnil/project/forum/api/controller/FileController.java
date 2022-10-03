@@ -17,7 +17,7 @@ import edunhnil.project.forum.api.service.fileService.FileService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
-@RequestMapping(value = "files-controller")
+@RequestMapping(value = "files")
 public class FileController extends AbstractController<FileService> {
     @PostMapping(value = "user/create-file")
     @SecurityRequirement(name = "Bearer Authentication")
