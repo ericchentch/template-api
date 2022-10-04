@@ -56,7 +56,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                 .get();
                 return Optional.of(new ListWrapperResponse<PostResponse>(
                                 posts.stream()
-                                                .map(p -> postUtils.generatePostResponse(p, "public", ""))
+                                                .map(p -> postUtils.generatePostResponse(p, "public", "a"))
                                                 .collect(Collectors.toList()),
                                 page, pageSize,
                                 repository.getTotalPage(allParams)));
@@ -105,7 +105,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 }
                 Post post = posts.get(0);
                 post.setView(post.getView() + 1);
-                return Optional.of(postUtils.generatePostResponse(post, "public", ""));
+                return Optional.of(postUtils.generatePostResponse(post, "public", "a"));
         }
 
         @Override

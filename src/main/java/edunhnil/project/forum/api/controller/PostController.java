@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,7 +93,7 @@ public class PostController extends AbstractController<PostService> {
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping(value = "user/add-new-post")
-    public void addNewPost(@RequestBody PostRequest postRequest,
+    public ResponseEntity<CommonResponse<String>> addNewPost(@RequestBody PostRequest postRequest,
             HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
@@ -100,56 +101,88 @@ public class PostController extends AbstractController<PostService> {
         String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                 JWT_SECRET);
         service.addNewPost(postRequest, id);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Add new post successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping(value = "user/update-post/{postId}")
-    public void updatePost(@PathVariable int postId, @RequestBody PostRequest postUpdateReq,
+    public ResponseEntity<CommonResponse<String>> updatePost(@PathVariable int postId,
+            @RequestBody PostRequest postUpdateReq,
             HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
         validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
         service.updatePostById(postUpdateReq, postId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Update post successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping(value = "admin/delete-post/{postId}")
-    public void deletePostAdmin(@PathVariable int postId, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> deletePostAdmin(@PathVariable int postId,
+            HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN" };
         validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         service.deletePostById(postId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Delete post successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping(value = "user/delete-post/{postId}")
-    public void deletePostUser(@PathVariable int postId, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> deletePostUser(@PathVariable int postId, HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
         validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
         service.deletePostById(postId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Delete post successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping(value = "admin/change-enabled/{postId}")
-    public void changeEnabledAdmin(@PathVariable int postId,
+    public ResponseEntity<CommonResponse<String>> changeEnabledAdmin(@PathVariable int postId,
             @RequestParam(required = true, defaultValue = "0") int input,
             HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN" };
         validateRole("role", JwtUtils.getJwtFromRequest(request), "", roles);
         service.changeEnabled(input, postId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Update post successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping(value = "user/change-enabled/{postId}")
-    public void changeEnabledUser(@PathVariable int postId,
+    public ResponseEntity<CommonResponse<String>> changeEnabledUser(@PathVariable int postId,
             @RequestParam(required = true, defaultValue = "0") int input,
             HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
         validateRole("post", JwtUtils.getJwtFromRequest(request), Integer.toString(postId), roles);
         service.changeEnabled(input, postId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Update post successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
 }

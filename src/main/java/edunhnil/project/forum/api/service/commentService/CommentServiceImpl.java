@@ -33,14 +33,14 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
 
         @Override
         public Optional<ListWrapperResponse<CommentResponse>> getPublicComment(int postId, int page,
-                        String keySort, String sortField) {
+                        String keySort, String sortField, String loginId) {
                 Map<String, String> allParams = new HashMap<String, String>();
                 allParams.put("postId", Integer.toString(postId));
                 List<Comment> comments = repository
                                 .getAllComment(allParams, keySort, page, 5, sortField)
                                 .get();
                 return Optional.of(new ListWrapperResponse<CommentResponse>(comments.stream()
-                                .map(c -> commentUtils.generateCommentResponse(c, "public"))
+                                .map(c -> commentUtils.generateCommentResponse(c, "public", loginId))
                                 .collect(Collectors.toList()), page, 5,
                                 repository.getTotalCommentPost(allParams)));
         }
@@ -49,7 +49,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         public Optional<ListWrapperResponse<CommentResponse>> getAdminComment(Map<String, String> allParams,
                         String keySort, int page,
                         int pageSize,
-                        String sortField) {
+                        String sortField, String loginId) {
                 List<Comment> comments = repository
                                 .getAllComment(allParams, keySort, page, pageSize, sortField)
                                 .orElseThrow(() -> new ResourceNotFoundException("No comment"));
@@ -57,7 +57,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                                 .of(new ListWrapperResponse<CommentResponse>(
                                                 comments.stream()
                                                                 .map(c -> commentUtils.generateCommentResponse(c,
-                                                                                ""))
+                                                                                "", loginId))
                                                                 .collect(Collectors.toList()),
                                                 page, pageSize,
                                                 repository.getTotalCommentPost(allParams)));

@@ -40,6 +40,7 @@ public class PostUtils {
                 paramsLiked.put("targetId", Integer.toString(p.getId()));
                 paramsLiked.put("type", "post");
                 paramsLiked.put("ownerId", loginId);
+                paramsLiked.put("deleted", "0");
 
                 if (type.compareTo("public") == 0) {
                         return new PostResponse(p.getId(), p.getAuthorId(),

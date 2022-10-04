@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +39,24 @@ public class CommentController extends AbstractController<CommentService> {
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(defaultValue = "modified") String sortField,
             @RequestParam(defaultValue = "asc") String keySort) {
-        return response(service.getPublicComment(postId, page, keySort, sortField),
+        return response(service.getPublicComment(postId, page, keySort, sortField, "a"),
+                "Get list of comments successfully!");
+    }
+
+    @SecurityRequirement(name = "Bearer Authentication")
+    @GetMapping(value = "/user/get-comment-in-post")
+    public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPostUser(
+            @RequestParam(required = true, defaultValue = "1") int postId,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(defaultValue = "modified") String sortField,
+            @RequestParam(defaultValue = "asc") String keySort, HttpServletRequest request) {
+        validateToken(request);
+        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
+        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
+        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                JWT_SECRET);
+        return response(
+                service.getPublicComment(postId, page, keySort, sortField, loginId),
                 "Get list of comments successfully!");
     }
 
@@ -53,46 +71,73 @@ public class CommentController extends AbstractController<CommentService> {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN" };
         validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-        return response(service.getAdminComment(allParams, keySort, page, pageSize, sortField),
+        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                JWT_SECRET);
+        return response(
+                service.getAdminComment(allParams, keySort, page, pageSize, sortField, loginId),
                 "Get list of comments successfully!");
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping(value = "user/add-new-comment/{postId}")
-    public void addNewComment(@RequestBody CommentRequest commentRequest, HttpServletRequest request,
+    public ResponseEntity<CommonResponse<String>> addNewComment(@RequestBody CommentRequest commentRequest,
+            HttpServletRequest request,
             @PathVariable int postId) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
         validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
         service.addNewComment(commentRequest, postId, id);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Add comment successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping(value = "user/edit-comment/{commentId}")
-    public void editComment(@RequestBody CommentRequest commentRequest, HttpServletRequest request,
+    public ResponseEntity<CommonResponse<String>> editComment(@RequestBody CommentRequest commentRequest,
+            HttpServletRequest request,
             @PathVariable int commentId) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
         validateRole("comment", JwtUtils.getJwtFromRequest(request), Integer.toString(commentId), roles);
         service.editCommentById(commentRequest, commentId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Edit comment successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping(value = "user/delete-comment/{commentId}")
-    public void userDeleteComment(@PathVariable int commentId, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> userDeleteComment(@PathVariable int commentId,
+            HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
         validateRole("comment", JwtUtils.getJwtFromRequest(request), Integer.toString(commentId), roles);
         service.deleteComment(commentId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Delete comment successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping(value = "admin/delete-comment/{commentId}")
-    public void adminDeleteComment(@PathVariable int commentId, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> adminDeleteComment(@PathVariable int commentId,
+            HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN" };
         validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         service.deleteComment(commentId);
+        return new ResponseEntity<CommonResponse<String>>(
+                new CommonResponse<String>(true, null, "Delete comment successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 }
