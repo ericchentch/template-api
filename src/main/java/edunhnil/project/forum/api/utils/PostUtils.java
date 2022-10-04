@@ -2,6 +2,7 @@ package edunhnil.project.forum.api.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,8 @@ public class PostUtils {
         public PostResponse generatePostResponse(Post p, String type, String loginId) {
 
                 UserResponse author = userService.getPublicUserById(p.getAuthorId()).get();
-                CategoryResponse category = categoryService.getCategoryDetailById(p.getCategoryId()).get();
+                Optional<CategoryResponse> categorySerRes = categoryService.getCategoryDetailById(p.getCategoryId());
+                CategoryResponse category = categorySerRes.get();
 
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("targetId", Integer.toString(p.getId()));

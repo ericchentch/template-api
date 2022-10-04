@@ -58,9 +58,14 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
         public Optional<CategoryResponse> getCategoryById(int id) {
                 Map<String, String> ids = new HashMap<>();
                 ids.put("id", Integer.toString(id));
-                Category category = repository.getCategories(ids)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id))
-                                .get(0);
+                List<Category> categories = repository.getCategories(ids).get();
+                System.out.println(categories.size());
+                if (categories.size() == 0)
+                        return Optional.of(new CategoryResponse(0,
+                                        "Deleted category",
+                                        "",
+                                        0, null));
+                Category category = categories.get(0);
                 List<String> searchField = new ArrayList<>();
                 searchField.add("category_id");
                 Map<String, String> allParams = new HashMap<String, String>();
@@ -89,9 +94,13 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
         public Optional<CategoryResponse> getCategoryDetailById(int id) {
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", Integer.toString(id));
-                Category category = repository.getCategories(allParams)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found category with id:" + id))
-                                .get(0);
+                List<Category> categories = repository.getCategories(allParams).get();
+                if (categories.size() == 0)
+                        return Optional.of(new CategoryResponse(0,
+                                        "Deleted category",
+                                        "",
+                                        0, null));
+                Category category = categories.get(0);
                 return Optional.of(new CategoryResponse(category.getId(),
                                 category.getCategoryName(),
                                 category.getPath(),
