@@ -22,11 +22,18 @@ public class CommentUtils {
     @Autowired
     private LikeRepository likeRepository;
 
-    public CommentResponse generateCommentResponse(Comment c, String type) {
+    public CommentResponse generateCommentResponse(Comment c, String type, String loginId) {
         UserResponse ownerInformation = userService.getPublicUserById(c.getOwnerId()).get();
         Map<String, String> allParams = new HashMap<>();
         allParams.put("targetId", Integer.toString(c.getId()));
         allParams.put("type", "comment");
+
+        Map<String, String> paramsLiked = new HashMap<>();
+        paramsLiked.put("targetId", Integer.toString(c.getId()));
+        paramsLiked.put("type", "comment");
+        paramsLiked.put("ownerId", loginId);
+        paramsLiked.put("deleted", "0");
+
         if (type.compareTo("public") == 0) {
             return new CommentResponse(c.getId(), c.getOwnerId(),
                     ownerInformation,
@@ -34,6 +41,7 @@ public class CommentUtils {
                     c.getContent(), likeRepository.getTotalLike(allParams),
                     DateFormat.toDateString(c.getCreated(), DateTime.YYYY_MM_DD),
                     DateFormat.toDateString(c.getModified(), DateTime.YYYY_MM_DD),
+                    likeRepository.getTotalLike(paramsLiked) != 0,
                     0);
         } else {
             return new CommentResponse(c.getId(), c.getOwnerId(),
@@ -42,6 +50,7 @@ public class CommentUtils {
                     c.getContent(), likeRepository.getTotalLike(allParams),
                     DateFormat.toDateString(c.getCreated(), DateTime.YYYY_MM_DD),
                     DateFormat.toDateString(c.getModified(), DateTime.YYYY_MM_DD),
+                    likeRepository.getTotalLike(paramsLiked) != 0,
                     0);
         }
     }

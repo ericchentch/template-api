@@ -53,8 +53,6 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
                 user.getPassword())) {
             throw new InvalidRequestException("password does not match");
         }
-
-        repository.insertAndUpdate(user);
         if (user.isVerify2FA()) {
             String verify2FACode = CodeGenerator.userCodeGenerator();
             emailService

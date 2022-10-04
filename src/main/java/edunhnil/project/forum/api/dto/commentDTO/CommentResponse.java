@@ -17,5 +17,6 @@ public class CommentResponse {
     private int like;
     private String created;
     private String modified;
+    private boolean liked;
     private int deleted;
 }
