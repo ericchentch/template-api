@@ -35,7 +35,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class UserController extends AbstractController<UserService> {
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "admin/getUsers")
+        @GetMapping(value = "admin/get-list-user")
         public ResponseEntity<CommonResponse<ListWrapperResponse<UserResponse>>> getUsers(
                         @RequestParam(required = false, defaultValue = "1") int page,
                         @RequestParam(required = false, defaultValue = "10") int pageSize,
@@ -49,7 +49,7 @@ public class UserController extends AbstractController<UserService> {
                                 "Get list of users successfully!");
         }
 
-        @GetMapping(value = "public/getUsers")
+        @GetMapping(value = "public/get-list-user")
         public ResponseEntity<CommonResponse<ListWrapperResponse<UserResponse>>> getPublicUsers(
                         @RequestParam(required = false, defaultValue = "1") int page,
                         @RequestParam(required = false, defaultValue = "10") int pageSize,
@@ -62,7 +62,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "admin/getUserDetail/{id}")
+        @GetMapping(value = "admin/get-detail-user/{id}")
         public ResponseEntity<CommonResponse<UserResponse>> getUserById(HttpServletRequest request,
                         @PathVariable String id) {
                 validateToken(request);
@@ -72,7 +72,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "user/getProfile")
+        @GetMapping(value = "user/get-profile")
         public ResponseEntity<CommonResponse<UserResponse>> getProfile(HttpServletRequest request) {
                 validateToken(request);
                 String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
@@ -83,7 +83,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PostMapping(value = "admin/addNewUser")
+        @PostMapping(value = "admin/add-new-user")
         public ResponseEntity<CommonResponse<String>> addNewUser(@RequestBody UserRequest userRequest,
                         HttpServletRequest request) {
                 validateToken(request);
@@ -98,7 +98,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "admin/updateUser/{userId}")
+        @PutMapping(value = "admin/update-user/{userId}")
         public ResponseEntity<CommonResponse<String>> updateUserAdmin(@RequestBody UserRequest userRequest,
                         @PathVariable(required = true) String userId,
                         HttpServletRequest request) {
@@ -114,7 +114,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "admin/deleteUser/{userId}")
+        @DeleteMapping(value = "admin/delete-user/{userId}")
         public ResponseEntity<CommonResponse<String>> deleteUserUser(HttpServletRequest request,
                         @PathVariable(required = true) String userId) {
                 validateToken(request);
@@ -129,7 +129,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/updateUser")
+        @PutMapping(value = "user/update-user")
         public ResponseEntity<CommonResponse<String>> updateUserUser(HttpServletRequest request,
                         @RequestBody UserRequest userRequest) {
                 validateToken(request);
@@ -146,7 +146,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "user/deleteUser")
+        @DeleteMapping(value = "user/delete-user")
         public ResponseEntity<CommonResponse<String>> deleteUserAdmin(HttpServletRequest request) {
                 validateToken(request);
                 String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
@@ -162,7 +162,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/changePassword")
+        @PutMapping(value = "user/change-password")
         public ResponseEntity<CommonResponse<String>> changePassword(@RequestBody ChangePasswordReq changePassword,
                         HttpServletRequest request) {
                 validateToken(request);
@@ -179,7 +179,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/changeUsername")
+        @PutMapping(value = "user/change-username")
         public ResponseEntity<CommonResponse<String>> changeUsername(@RequestBody ChangeUsernameReq changeUsername,
                         HttpServletRequest request) {
                 validateToken(request);
@@ -196,7 +196,7 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/change2FAStatus")
+        @PutMapping(value = "user/change-2fa-status")
         public ResponseEntity<CommonResponse<String>> change2FAStatus(HttpServletRequest request) {
                 validateToken(request);
                 String[] roles = { "ROLE_ADMIN", "ROLE_USER" };

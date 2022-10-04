@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edunhnil.project.forum.api.constant.FormInput;
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.loginDTO.LoginRequest;
@@ -37,9 +38,15 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
         if (!isRegister) {
             PasswordValidator.validatePassword(loginRequest.getPassword());
         }
-        User user = repository.checkUsername(loginRequest.getUsername()).orElseThrow(
-                () -> new ResourceNotFoundException(
-                        "Not found user with username: " + loginRequest.getUsername()));
+        User user = new User();
+        if (loginRequest.getUsername().matches(FormInput.EMAIL)) {
+            user = repository.getUserByEmail(loginRequest.getUsername()).orElseThrow(
+                    () -> new ResourceNotFoundException("Not found user with email: " + loginRequest.getUsername()));
+        } else {
+            user = repository.checkUsername(loginRequest.getUsername()).orElseThrow(
+                    () -> new ResourceNotFoundException(
+                            "Not found user with username: " + loginRequest.getUsername()));
+        }
         if (!user.isVerified())
             throw new InvalidRequestException("This account is not verified!");
         if (!bCryptPasswordEncoder().matches(loginRequest.getPassword(),
@@ -107,8 +114,14 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Override
     public void verifyRegister(String code, String email) {
-        User user = repository.getUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("This email is invalid!"));
+        User user = new User();
+        if (email.matches(FormInput.EMAIL)) {
+            user = repository.getUserByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("This email is invalid!"));
+        } else {
+            user = repository.checkUsername(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("Username is not exist, please register!"));
+        }
         Date now = new Date();
         if (user.getCode().compareTo(code) != 0)
             throw new InvalidRequestException("This code is invalid");
@@ -151,8 +164,14 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Override
     public Optional<LoginResponse> verify2FA(String email, String code) {
-        User user = repository.getUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("This email is invalid!"));
+        User user = new User();
+        if (email.matches(FormInput.EMAIL)) {
+            user = repository.getUserByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("This email is invalid!"));
+        } else {
+            user = repository.checkUsername(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("Username is not exist, please register!"));
+        }
         Date now = new Date();
         if (user.getCode().compareTo(code) != 0)
             throw new InvalidRequestException("This code is invalid");

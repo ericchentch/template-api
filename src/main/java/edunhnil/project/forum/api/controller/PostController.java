@@ -32,7 +32,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class PostController extends AbstractController<PostService> {
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "user/getListPost")
+    @GetMapping(value = "user/get-list-post")
     public ResponseEntity<CommonResponse<ListWrapperResponse<PostResponse>>> getUserPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -49,7 +49,7 @@ public class PostController extends AbstractController<PostService> {
                 "Get list of posts successfully!");
     }
 
-    @GetMapping(value = "public/getListPost")
+    @GetMapping(value = "public/get-list-post")
     public ResponseEntity<CommonResponse<ListWrapperResponse<PostResponse>>> getPublicPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -62,7 +62,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "admin/getPost/{postId}")
+    @GetMapping(value = "admin/get-post/{postId}")
     public ResponseEntity<CommonResponse<PostResponse>> getPostAdmin(@PathVariable int postId,
             HttpServletRequest request) {
         validateToken(request);
@@ -74,7 +74,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "user/getPost/{postId}")
+    @GetMapping(value = "user/get-post/{postId}")
     public ResponseEntity<CommonResponse<PostResponse>> getPostUser(@PathVariable int postId,
             HttpServletRequest request) {
         validateToken(request);
@@ -85,13 +85,13 @@ public class PostController extends AbstractController<PostService> {
         return response(service.getPrivatePost(postId, loginId), "Get post successfully!");
     }
 
-    @GetMapping(value = "public/getPost/{postId}")
+    @GetMapping(value = "public/get-post/{postId}")
     public ResponseEntity<CommonResponse<PostResponse>> getPostPublic(@PathVariable int postId) {
         return response(service.getPostById(postId), "Get post successfully!");
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @PostMapping(value = "user/addNewPost")
+    @PostMapping(value = "user/add-new-post")
     public void addNewPost(@RequestBody PostRequest postRequest,
             HttpServletRequest request) {
         validateToken(request);
@@ -103,7 +103,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @PutMapping(value = "user/updatePost/{postId}")
+    @PutMapping(value = "user/update-post/{postId}")
     public void updatePost(@PathVariable int postId, @RequestBody PostRequest postUpdateReq,
             HttpServletRequest request) {
         validateToken(request);
@@ -113,7 +113,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @DeleteMapping(value = "admin/deletePost/{postId}")
+    @DeleteMapping(value = "admin/delete-post/{postId}")
     public void deletePostAdmin(@PathVariable int postId, HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN" };
@@ -122,7 +122,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @DeleteMapping(value = "user/deletePost/{postId}")
+    @DeleteMapping(value = "user/delete-post/{postId}")
     public void deletePostUser(@PathVariable int postId, HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
@@ -131,7 +131,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @PutMapping(value = "admin/changeEnabled/{postId}")
+    @PutMapping(value = "admin/change-enabled/{postId}")
     public void changeEnabledAdmin(@PathVariable int postId,
             @RequestParam(required = true, defaultValue = "0") int input,
             HttpServletRequest request) {
@@ -142,7 +142,7 @@ public class PostController extends AbstractController<PostService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @PutMapping(value = "user/changeEnabled/{postId}")
+    @PutMapping(value = "user/change-enabled/{postId}")
     public void changeEnabledUser(@PathVariable int postId,
             @RequestParam(required = true, defaultValue = "0") int input,
             HttpServletRequest request) {

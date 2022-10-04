@@ -14,7 +14,7 @@ import edunhnil.project.forum.api.service.searchService.SearchService;
 @RequestMapping(value = "search")
 public class SearchController extends AbstractController<SearchService> {
 
-    @GetMapping(value = "totalSearch")
+    @GetMapping(value = "total-search")
     public ResponseEntity<CommonResponse<SearchResponse>> searchTotal(@RequestParam String keySearch) {
         return response(service.totalSearch(keySearch), "Get search result successfully");
     }
