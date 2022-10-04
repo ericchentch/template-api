@@ -58,7 +58,7 @@ public class LoginController extends AbstractController<LoginService> {
                                 HttpStatus.OK.value());
         }
 
-        @PostMapping(value = "verifyEmail/{email}/{code}")
+        @PostMapping(value = "verify-email/{email}/{code}")
         public ResponseEntity<CommonResponse<String>> verifyEmail(@PathVariable String email,
                         @PathVariable String code) {
                 service.verifyRegister(code, email);
@@ -69,7 +69,7 @@ public class LoginController extends AbstractController<LoginService> {
                                 HttpStatus.OK.value());
         }
 
-        @PostMapping(value = "verifyEmail/resend/{email}")
+        @PostMapping(value = "verify-email/resend/{email}")
         public ResponseEntity<CommonResponse<String>> resendVerifyEmail(@PathVariable String email) {
                 service.resendVerifyRegister(email);
                 return new ResponseEntity<CommonResponse<String>>(
@@ -79,7 +79,7 @@ public class LoginController extends AbstractController<LoginService> {
                                 HttpStatus.OK.value());
         }
 
-        @PostMapping(value = "forgotPassword/{email}")
+        @PostMapping(value = "forgot-password/{email}")
         public ResponseEntity<CommonResponse<String>> forgotPassword(@PathVariable String email) {
                 service.forgotPassword(email);
                 return new ResponseEntity<CommonResponse<String>>(
@@ -89,13 +89,13 @@ public class LoginController extends AbstractController<LoginService> {
                                 HttpStatus.OK.value());
         }
 
-        @PostMapping(value = "verify2FA/{email}/{code}")
+        @PostMapping(value = "verify-2fa/{email}/{code}")
         public ResponseEntity<CommonResponse<LoginResponse>> verify2FA(@PathVariable String email,
                         @PathVariable String code) {
                 return response(service.verify2FA(email, code), "Verify 2FA successfully!");
         }
 
-        @PostMapping(value = "verify2FA/resend/{email}")
+        @PostMapping(value = "verify-2fa/resend/{email}")
         public ResponseEntity<CommonResponse<String>> resendVerify2FA(@PathVariable String email) {
                 service.resend2FACode(email);
                 return new ResponseEntity<CommonResponse<String>>(

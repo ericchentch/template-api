@@ -32,7 +32,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 public class CommentController extends AbstractController<CommentService> {
 
-    @GetMapping(value = "/public/getCommentInPost")
+    @GetMapping(value = "/public/get-comment-in-post")
     public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPost(
             @RequestParam(required = true, defaultValue = "1") int postId,
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -43,7 +43,7 @@ public class CommentController extends AbstractController<CommentService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "admin/getAllComment")
+    @GetMapping(value = "admin/get-all-comment")
     public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentAdmin(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
@@ -58,7 +58,7 @@ public class CommentController extends AbstractController<CommentService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @PostMapping(value = "user/addNewComment/{postId}")
+    @PostMapping(value = "user/add-new-comment/{postId}")
     public void addNewComment(@RequestBody CommentRequest commentRequest, HttpServletRequest request,
             @PathVariable int postId) {
         validateToken(request);
@@ -69,7 +69,7 @@ public class CommentController extends AbstractController<CommentService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @PutMapping(value = "user/editComment/{commentId}")
+    @PutMapping(value = "user/edit-comment/{commentId}")
     public void editComment(@RequestBody CommentRequest commentRequest, HttpServletRequest request,
             @PathVariable int commentId) {
         validateToken(request);
@@ -79,7 +79,7 @@ public class CommentController extends AbstractController<CommentService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @DeleteMapping(value = "user/deleteComment/{commentId}")
+    @DeleteMapping(value = "user/delete-comment/{commentId}")
     public void userDeleteComment(@PathVariable int commentId, HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
@@ -88,7 +88,7 @@ public class CommentController extends AbstractController<CommentService> {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @DeleteMapping(value = "admin/deleteComment/{commentId}")
+    @DeleteMapping(value = "admin/delete-comment/{commentId}")
     public void adminDeleteComment(@PathVariable int commentId, HttpServletRequest request) {
         validateToken(request);
         String[] roles = { "ROLE_ADMIN" };

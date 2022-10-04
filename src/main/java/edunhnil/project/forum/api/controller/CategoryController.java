@@ -23,7 +23,7 @@ import edunhnil.project.forum.api.service.categoryService.CategoryService;
 // RequestMethod.DELETE }, allowedHeaders = "*", allowCredentials = "true")
 public class CategoryController extends AbstractController<CategoryService> {
 
-    @GetMapping(value = "/getList")
+    @GetMapping(value = "/get-list")
     public ResponseEntity<CommonResponse<List<CategoryResponse>>> getCategories(HttpServletRequest request,
             @RequestParam Map<String, String> allParams) {
         return response(service.getCategories(allParams), "Get list of category successfully!");
