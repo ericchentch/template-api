@@ -59,28 +59,6 @@ public abstract class AbstractController<s> {
         }
     }
 
-<<<<<<< HEAD
-=======
-    protected void validateRole(String type, String token, String id, String[] roles) {
-        if (type.compareTo("role") == 0) {
-            if (!guard.checkRoleById(token, roles))
-                throw new ForbiddenException("Access denied!");
-        }
-        if (type.compareTo("post") == 0) {
-            if (!guard.checkAuthorId(token, Integer.parseInt(id)))
-                throw new ForbiddenException("Access denied!");
-        }
-        if (type.compareTo("comment") == 0) {
-            if (!guard.checkCommentId(token, Integer.parseInt(id)))
-                throw new ForbiddenException("Access denied!");
-        }
-        if (type.compareTo("file") == 0) {
-            if (!guard.checkRoleForDeleteFile(token, id))
-                throw new ForbiddenException("Access denied!");
-        }
-    }
-
->>>>>>> 5000d2a (update: file controller with guard)
     protected <T> ResponseEntity<CommonResponse<T>> response(Optional<T> response, String successMessage) {
         return new ResponseEntity<>(new CommonResponse<>(true, response.orElseThrow(() -> {
             throw new ResourceNotFoundException("Resource not found");

@@ -26,9 +26,6 @@ public class FileController extends AbstractController<FileService> {
     @SecurityRequirement(name = "Bearer Authentication")
     void createFile(@RequestBody FileRequest fileRequest, HttpServletRequest request) {
         validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-
         service.createFile(fileRequest);
     }
 
@@ -36,11 +33,8 @@ public class FileController extends AbstractController<FileService> {
     @SecurityRequirement(name = "Bearer Authentication")
     ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(HttpServletRequest request) {
         validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
         String userId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                         JWT_SECRET);
-        
         return response(service.getFilesByUserId(userId), "Success");
     }
     
@@ -48,22 +42,24 @@ public class FileController extends AbstractController<FileService> {
     @SecurityRequirement(name = "Bearer Authentication")
     ResponseEntity<CommonResponse<FileResponse>> getFilesByFileId(@PathVariable String fileId, HttpServletRequest request) {
         validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-        
         return response(service.getFileById(fileId), "Success");
     }
 
     @DeleteMapping(value = "user/delete-file/{_id}")
     @SecurityRequirement(name = "Bear Authentication")
-    String deleteFile(@PathVariable String _id, HttpServletRequest request) {
+    String deleteFileUser(@PathVariable String _id, HttpServletRequest request) {
         validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("file", JwtUtils.getJwtFromRequest(request), _id, roles);
-        String userId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                        JWT_SECRET);
-        
-        service.deleteFile(_id);
+        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                                JWT_SECRET);
+        service.deleteFileUsers(_id, loginId);
+        return "Success";
+    }
+
+    @DeleteMapping(value = "admin/delete-file/{_id}")
+    @SecurityRequirement(name = "Bear Authentication")
+    String deleteFileAdmin(@PathVariable String _id, HttpServletRequest request) {
+        validateToken(request);
+        service.deleteFileAdmins(_id);
         return "Success";
     }
 }

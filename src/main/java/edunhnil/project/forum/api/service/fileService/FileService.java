@@ -8,7 +8,9 @@ import edunhnil.project.forum.api.dto.fileDTO.FileResponse;
 
 public interface FileService {
     void createFile(FileRequest fileRequest);
-    void deleteFile(String _id);
+    void deleteFileAdmins(String _id);
+    void deleteFileUsers(String _id, String loginId);
+
     Optional<ListWrapperResponse<FileResponse>> getFilesByUserId(String userId);
     Optional<FileResponse> getFileById(String fileId);
 }

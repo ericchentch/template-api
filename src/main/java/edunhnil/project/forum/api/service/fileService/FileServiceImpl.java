@@ -13,13 +13,14 @@ import edunhnil.project.forum.api.dao.fileRepository.FileRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 import edunhnil.project.forum.api.dto.fileDTO.FileRequest;
 import edunhnil.project.forum.api.dto.fileDTO.FileResponse;
+import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
 import edunhnil.project.forum.api.utils.DateFormat;
 import edunhnil.project.forum.api.utils.FileUtils;
 
 @Service
-public class FileServiceImpl extends AbstractService<FileRepository> implements FileService{
+public class FileServiceImpl extends AbstractService<FileRepository> implements FileService {
 
     @Autowired
     private FileUtils fileUtils;
@@ -29,13 +30,6 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
         File file = objectMapper.convertValue(fileRequest, File.class);
         file.setDeleted("false");
         file.setCreatedAt(DateFormat.getCurrentTime());
-        repository.saveFile(file);
-    }
-
-    @Override
-    public void deleteFile(String _id) {
-        File file = repository.getFileById(_id).orElseThrow(() -> new ResourceNotFoundException("Not found file with id: " + _id));
-        file.setDeleted("true");
         repository.saveFile(file);
     }
 
@@ -61,9 +55,24 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
     public Optional<FileResponse> getFileById(String fileId) {
         File file = repository.getFileById(fileId).orElseThrow(
             () -> new ResourceNotFoundException("Not found file with id: " + fileId));
-
         FileResponse result = fileUtils.generateFileResponse(file);
-
         return Optional.of(result);
+    }
+
+    @Override
+    public void deleteFileAdmins(String _id) {
+        File file = repository.getFileById(_id).orElseThrow(() -> new ResourceNotFoundException("Not found file with id: " + _id));
+        file.setDeleted("true");
+        repository.saveFile(file);
+    }
+
+    @Override
+    public void deleteFileUsers(String _id, String loginId) {
+        File file = repository.getFileById(_id).orElseThrow(() -> new ResourceNotFoundException("Not found file with id: " + _id));
+        if(file.getUserId().toString().compareTo(loginId) != 0) {
+            throw new ForbiddenException("Access denied!");
+        }
+        file.setDeleted("true");
+        repository.saveFile(file);
     }
 }
