@@ -20,12 +20,16 @@ public interface PostService {
 
         Optional<PostResponse> getPostById(int id);
 
-        void updatePostById(PostRequest req, int id);
+        void updatePostById(PostRequest req, int id, String loginId);
 
         void addNewPost(PostRequest postRequest, String authorId);
 
-        void deletePostById(int id);
+        void deleteUserPostById(int id, String loginId);
 
-        void changeEnabled(int input, int id);
+        void deleteAdminPostById(int id);
+
+        void changeUserEnabled(int input, int id, String loginId);
+
+        void changeAdminEnabled(int input, int id);
 
 }

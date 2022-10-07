@@ -16,6 +16,7 @@ import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 import edunhnil.project.forum.api.dto.postDTO.PostRequest;
 import edunhnil.project.forum.api.dto.postDTO.PostResponse;
+import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
 import edunhnil.project.forum.api.utils.DateFormat;
@@ -109,7 +110,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void updatePostById(PostRequest req, int id) {
+        public void updatePostById(PostRequest req, int id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
@@ -119,6 +120,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                         id);
                 }
                 Post post = posts.get(0);
+                if (post.getAuthorId().compareTo(loginId) != 0) {
+                        throw new ForbiddenException("Access denied!");
+                }
                 validate(req);
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", Integer.toString(id));
@@ -154,7 +158,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void deletePostById(int id) {
+        public void deleteAdminPostById(int id) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
@@ -170,7 +174,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void changeEnabled(int input, int id) {
+        public void changeAdminEnabled(int input, int id) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", Integer.toString(id));
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
@@ -180,6 +184,45 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                         id);
                 }
                 Post post = posts.get(0);
+                post.setEnabled(input);
+                post.setModified(DateFormat.getCurrentTime());
+                repository.savePost(post);
+        }
+
+        @Override
+        public void deleteUserPostById(int id, String loginId) {
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
+                Post post = posts.get(0);
+                if (post.getAuthorId().compareTo(loginId) != 0) {
+                        throw new ForbiddenException("Access denied!");
+                }
+                post.setModified(DateFormat.getCurrentTime());
+                post.setDeleted(1);
+                repository.savePost(post);
+
+        }
+
+        @Override
+        public void changeUserEnabled(int input, int id, String loginId) {
+                Map<String, String> postIds = new HashMap<>();
+                postIds.put("id", Integer.toString(id));
+                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Not found post with id: " +
+                                        id);
+                }
+                Post post = posts.get(0);
+                if (post.getAuthorId().compareTo(loginId) != 0) {
+                        throw new ForbiddenException("Access denied!");
+                }
                 post.setEnabled(input);
                 post.setModified(DateFormat.getCurrentTime());
                 repository.savePost(post);

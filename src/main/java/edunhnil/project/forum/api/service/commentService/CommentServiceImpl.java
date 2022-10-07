@@ -16,6 +16,7 @@ import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dto.commentDTO.CommentRequest;
 import edunhnil.project.forum.api.dto.commentDTO.CommentResponse;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
+import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
 import edunhnil.project.forum.api.utils.CommentUtils;
@@ -82,7 +83,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         }
 
         @Override
-        public void editCommentById(CommentRequest commentRequest, int id) {
+        public void editCommentById(CommentRequest commentRequest, int id, String loginId) {
                 validate(commentRequest);
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", Integer.toString(id));
@@ -92,13 +93,34 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                         throw new ResourceNotFoundException("Not found comment with id:" + id);
                 }
                 Comment comment = objectMapper.convertValue(comments.get(0), Comment.class);
+                if (comment.getOwnerId().compareTo(loginId) != 0) {
+                        throw new ForbiddenException("Access denied!");
+                }
                 comment.setContent(commentRequest.getContent());
                 comment.setModified(DateFormat.getCurrentTime());
                 repository.saveComment(comment);
         }
 
         @Override
-        public void deleteComment(int id) {
+        public void deleteUserComment(int id, String loginId) {
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", Integer.toString(id));
+                List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
+                                .get();
+                if (comments.size() == 0) {
+                        throw new ResourceNotFoundException("Not found comment with id:" + id);
+                }
+                Comment comment = comments.get(0);
+                if (comment.getOwnerId().compareTo(loginId) != 0) {
+                        throw new ForbiddenException("Access denied!");
+                }
+                comment.setDeleted(0);
+                comment.setModified(DateFormat.getCurrentTime());
+                repository.saveComment(comment);
+        }
+
+        @Override
+        public void deleteAdminComment(int id) {
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", Integer.toString(id));
                 List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
