@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface FileRepository {
     void saveFile(File file);
-    Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize);
+    Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize, String keySort, String sortField);
     Optional<File> getFileById(String _id);
-    // void deleteFile(File file);
 }

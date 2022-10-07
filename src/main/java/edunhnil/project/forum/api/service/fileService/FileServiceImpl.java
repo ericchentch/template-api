@@ -34,12 +34,18 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
     }
 
     @Override
-    public Optional<ListWrapperResponse<FileResponse>> getFilesByUserId(String userId) {
-        Map<String, String> allParams = Map.ofEntries(
-                    Map.entry("userId", userId),
-                    Map.entry("deleted", "false")
-                );
-        List<File> files = repository.getFiles(allParams, 0, 0).get();
+    public Optional<ListWrapperResponse<FileResponse>> getFilesByUserId(
+        String userId,
+        int page,
+        int pageSize,
+        Map<String, String> allParams,
+        String keySort,
+        String sortField
+    ) {
+        allParams.put("userId", userId);
+        allParams.put("deleted", "false");
+
+        List<File> files = repository.getFiles(allParams, page, pageSize, keySort, sortField).get();
         return Optional.of(new ListWrapperResponse<FileResponse> (
             files
                 .stream()

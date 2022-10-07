@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.controller;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
@@ -35,13 +38,26 @@ public class FileController extends AbstractController<FileService> {
             HttpStatus.OK.value());
     }
 
-    @GetMapping(value = "user/get-files/{userId}")
+    @GetMapping(value = "user/get-files/")
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(
+        @RequestParam(required = false, defaultValue = "1") int page,
+        @RequestParam(required = false, defaultValue = "10") int pageSize,
+        @RequestParam Map<String, String> allParams,
+        @RequestParam(defaultValue = "asc") String keySort,
+        @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request
+    ) {
         validateToken(request);
         String userId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                         JWT_SECRET);
-        return response(service.getFilesByUserId(userId), "Success");
+        return response(service.getFilesByUserId(
+            userId,
+            page,
+            pageSize,
+            allParams,
+            keySort,
+            sortField
+        ), "Success");
     }
     
     @GetMapping(value = "user/get-file/{fileId}")
