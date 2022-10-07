@@ -17,8 +17,8 @@ public class FileRepositoryImpl extends AbstractMongoRepository implements FileR
     }
 
     @Override
-    public Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize) {
-        Query query = generateQueryMongoDB(allParams, File.class, "", "", page, pageSize);
+    public Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize, String keySort, String sortField) {
+        Query query = generateQueryMongoDB(allParams, File.class, keySort, sortField, page, pageSize);
         Optional<List<File>> total = replaceFind(query, File.class);
         return total;
     }
