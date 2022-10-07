@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema
 public class FileRequest {
     @Schema(type = "string", defaultValue = " ")
     @NotEmpty(message = "User Id is required")
