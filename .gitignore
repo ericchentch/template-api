@@ -28,3 +28,4 @@ hs_err_pid*
 *.env
 *.local
 .idea/
+.java-version
