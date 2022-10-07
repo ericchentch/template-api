@@ -16,7 +16,9 @@ public interface CommentService {
 
         void addNewComment(CommentRequest commentRequest, int postId, String ownerId);
 
-        void editCommentById(CommentRequest commentRequest, int id);
+        void editCommentById(CommentRequest commentRequest, int id, String loginId);
 
-        void deleteComment(int id);
+        void deleteUserComment(int id, String loginId);
+
+        void deleteAdminComment(int id);
 }

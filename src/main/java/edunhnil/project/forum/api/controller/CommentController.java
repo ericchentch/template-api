@@ -33,111 +33,101 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 public class CommentController extends AbstractController<CommentService> {
 
-    @GetMapping(value = "/public/get-comment-in-post")
-    public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPost(
-            @RequestParam(required = true, defaultValue = "1") int postId,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(defaultValue = "modified") String sortField,
-            @RequestParam(defaultValue = "asc") String keySort) {
-        return response(service.getPublicComment(postId, page, keySort, sortField, "a"),
-                "Get list of comments successfully!");
-    }
+        @GetMapping(value = "/public/get-comment-in-post")
+        public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPost(
+                        @RequestParam(required = true, defaultValue = "1") int postId,
+                        @RequestParam(required = false, defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "modified") String sortField,
+                        @RequestParam(defaultValue = "asc") String keySort) {
+                return response(service.getPublicComment(postId, page, keySort, sortField, "a"),
+                                "Get list of comments successfully!");
+        }
 
-    @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "/user/get-comment-in-post")
-    public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPostUser(
-            @RequestParam(required = true, defaultValue = "1") int postId,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(defaultValue = "modified") String sortField,
-            @RequestParam(defaultValue = "asc") String keySort, HttpServletRequest request) {
-        validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                JWT_SECRET);
-        return response(
-                service.getPublicComment(postId, page, keySort, sortField, loginId),
-                "Get list of comments successfully!");
-    }
+        @SecurityRequirement(name = "Bearer Authentication")
+        @GetMapping(value = "/user/get-comment-in-post")
+        public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPostUser(
+                        @RequestParam(required = true, defaultValue = "1") int postId,
+                        @RequestParam(required = false, defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "modified") String sortField,
+                        @RequestParam(defaultValue = "asc") String keySort, HttpServletRequest request) {
+                validateToken(request);
+                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                                JWT_SECRET);
+                return response(
+                                service.getPublicComment(postId, page, keySort, sortField, loginId),
+                                "Get list of comments successfully!");
+        }
 
-    @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "admin/get-all-comment")
-    public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentAdmin(
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "asc") String keySort,
-            @RequestParam(defaultValue = "modified") String sortField,
-            @RequestParam Map<String, String> allParams, HttpServletRequest request) {
-        validateToken(request);
-        String[] roles = { "ROLE_ADMIN" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-        String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                JWT_SECRET);
-        return response(
-                service.getAdminComment(allParams, keySort, page, pageSize, sortField, loginId),
-                "Get list of comments successfully!");
-    }
+        @SecurityRequirement(name = "Bearer Authentication")
+        @GetMapping(value = "admin/get-all-comment")
+        public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentAdmin(
+                        @RequestParam(required = false, defaultValue = "1") int page,
+                        @RequestParam(required = false, defaultValue = "10") int pageSize,
+                        @RequestParam(defaultValue = "asc") String keySort,
+                        @RequestParam(defaultValue = "modified") String sortField,
+                        @RequestParam Map<String, String> allParams, HttpServletRequest request) {
+                validateToken(request);
+                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                                JWT_SECRET);
+                return response(
+                                service.getAdminComment(allParams, keySort, page, pageSize, sortField, loginId),
+                                "Get list of comments successfully!");
+        }
 
-    @SecurityRequirement(name = "Bearer Authentication")
-    @PostMapping(value = "user/add-new-comment/{postId}")
-    public ResponseEntity<CommonResponse<String>> addNewComment(@RequestBody CommentRequest commentRequest,
-            HttpServletRequest request,
-            @PathVariable int postId) {
-        validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-        String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
-        service.addNewComment(commentRequest, postId, id);
-        return new ResponseEntity<CommonResponse<String>>(
-                new CommonResponse<String>(true, null, "Add comment successfully!",
-                        HttpStatus.OK.value()),
-                null,
-                HttpStatus.OK.value());
-    }
+        @SecurityRequirement(name = "Bearer Authentication")
+        @PostMapping(value = "user/add-new-comment/{postId}")
+        public ResponseEntity<CommonResponse<String>> addNewComment(@RequestBody CommentRequest commentRequest,
+                        HttpServletRequest request,
+                        @PathVariable int postId) {
+                validateToken(request);
+                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
+                service.addNewComment(commentRequest, postId, id);
+                return new ResponseEntity<CommonResponse<String>>(
+                                new CommonResponse<String>(true, null, "Add comment successfully!",
+                                                HttpStatus.OK.value()),
+                                null,
+                                HttpStatus.OK.value());
+        }
 
-    @SecurityRequirement(name = "Bearer Authentication")
-    @PutMapping(value = "user/edit-comment/{commentId}")
-    public ResponseEntity<CommonResponse<String>> editComment(@RequestBody CommentRequest commentRequest,
-            HttpServletRequest request,
-            @PathVariable int commentId) {
-        validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("comment", JwtUtils.getJwtFromRequest(request), Integer.toString(commentId), roles);
-        service.editCommentById(commentRequest, commentId);
-        return new ResponseEntity<CommonResponse<String>>(
-                new CommonResponse<String>(true, null, "Edit comment successfully!",
-                        HttpStatus.OK.value()),
-                null,
-                HttpStatus.OK.value());
-    }
+        @SecurityRequirement(name = "Bearer Authentication")
+        @PutMapping(value = "user/edit-comment/{commentId}")
+        public ResponseEntity<CommonResponse<String>> editComment(@RequestBody CommentRequest commentRequest,
+                        HttpServletRequest request,
+                        @PathVariable int commentId) {
+                validateToken(request);
+                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
+                service.editCommentById(commentRequest, commentId, id);
+                return new ResponseEntity<CommonResponse<String>>(
+                                new CommonResponse<String>(true, null, "Edit comment successfully!",
+                                                HttpStatus.OK.value()),
+                                null,
+                                HttpStatus.OK.value());
+        }
 
-    @SecurityRequirement(name = "Bearer Authentication")
-    @DeleteMapping(value = "user/delete-comment/{commentId}")
-    public ResponseEntity<CommonResponse<String>> userDeleteComment(@PathVariable int commentId,
-            HttpServletRequest request) {
-        validateToken(request);
-        String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-        validateRole("comment", JwtUtils.getJwtFromRequest(request), Integer.toString(commentId), roles);
-        service.deleteComment(commentId);
-        return new ResponseEntity<CommonResponse<String>>(
-                new CommonResponse<String>(true, null, "Delete comment successfully!",
-                        HttpStatus.OK.value()),
-                null,
-                HttpStatus.OK.value());
-    }
+        @SecurityRequirement(name = "Bearer Authentication")
+        @DeleteMapping(value = "user/delete-comment/{commentId}")
+        public ResponseEntity<CommonResponse<String>> userDeleteComment(@PathVariable int commentId,
+                        HttpServletRequest request) {
+                validateToken(request);
+                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
+                service.deleteUserComment(commentId, id);
+                return new ResponseEntity<CommonResponse<String>>(
+                                new CommonResponse<String>(true, null, "Delete comment successfully!",
+                                                HttpStatus.OK.value()),
+                                null,
+                                HttpStatus.OK.value());
+        }
 
-    @SecurityRequirement(name = "Bearer Authentication")
-    @DeleteMapping(value = "admin/delete-comment/{commentId}")
-    public ResponseEntity<CommonResponse<String>> adminDeleteComment(@PathVariable int commentId,
-            HttpServletRequest request) {
-        validateToken(request);
-        String[] roles = { "ROLE_ADMIN" };
-        validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
-        service.deleteComment(commentId);
-        return new ResponseEntity<CommonResponse<String>>(
-                new CommonResponse<String>(true, null, "Delete comment successfully!",
-                        HttpStatus.OK.value()),
-                null,
-                HttpStatus.OK.value());
-    }
+        @SecurityRequirement(name = "Bearer Authentication")
+        @DeleteMapping(value = "admin/delete-comment/{commentId}")
+        public ResponseEntity<CommonResponse<String>> adminDeleteComment(@PathVariable int commentId,
+                        HttpServletRequest request) {
+                validateToken(request);
+                service.deleteAdminComment(commentId);
+                return new ResponseEntity<CommonResponse<String>>(
+                                new CommonResponse<String>(true, null, "Delete comment successfully!",
+                                                HttpStatus.OK.value()),
+                                null,
+                                HttpStatus.OK.value());
+        }
 }

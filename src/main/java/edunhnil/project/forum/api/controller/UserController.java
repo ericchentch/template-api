@@ -43,8 +43,6 @@ public class UserController extends AbstractController<UserService> {
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 return response(service.getUsers(allParams, keySort, page, pageSize, sortField),
                                 "Get list of users successfully!");
         }
@@ -66,8 +64,6 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<UserResponse>> getUserById(HttpServletRequest request,
                         @PathVariable String id) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 return response(service.getUserById(id), "Get user successfully!");
         }
 
@@ -75,8 +71,6 @@ public class UserController extends AbstractController<UserService> {
         @GetMapping(value = "user/get-profile")
         public ResponseEntity<CommonResponse<UserResponse>> getProfile(HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 return response(service.getUserById(id), "Get user successfully!");
@@ -87,8 +81,6 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<String>> addNewUser(@RequestBody UserRequest userRequest,
                         HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 service.addNewUser(userRequest);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add user successfully!",
@@ -103,8 +95,6 @@ public class UserController extends AbstractController<UserService> {
                         @PathVariable(required = true) String userId,
                         HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 service.updateUserById(userRequest, userId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update user successfully!",
@@ -118,8 +108,6 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<String>> deleteUserUser(HttpServletRequest request,
                         @PathVariable(required = true) String userId) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 service.deleteUserById(userId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete user successfully!",
@@ -133,8 +121,6 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<String>> updateUserUser(HttpServletRequest request,
                         @RequestBody UserRequest userRequest) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.updateUserById(userRequest, id);
@@ -149,8 +135,6 @@ public class UserController extends AbstractController<UserService> {
         @DeleteMapping(value = "user/delete-user")
         public ResponseEntity<CommonResponse<String>> deleteUserAdmin(HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.deleteUserById(id);
@@ -166,8 +150,6 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<String>> changePassword(@RequestBody ChangePasswordReq changePassword,
                         HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.changePasswordById(changePassword, id);
@@ -183,8 +165,6 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<String>> changeUsername(@RequestBody ChangeUsernameReq changeUsername,
                         HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.changeUsernameById(changeUsername, id);
@@ -199,8 +179,6 @@ public class UserController extends AbstractController<UserService> {
         @PutMapping(value = "user/change-2fa-status")
         public ResponseEntity<CommonResponse<String>> change2FAStatus(HttpServletRequest request) {
                 validateToken(request);
-                String[] roles = { "ROLE_ADMIN", "ROLE_USER" };
-                validateRole("role", JwtUtils.getJwtFromRequest(request), "0", roles);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.change2FAStatus(id);
