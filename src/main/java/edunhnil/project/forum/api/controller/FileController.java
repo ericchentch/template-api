@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,68 +27,70 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class FileController extends AbstractController<FileService> {
     @PostMapping(value = "user/create-file")
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<CommonResponse<String>> createFile(@RequestBody FileRequest fileRequest, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> createFile(@RequestBody FileRequest fileRequest,
+            HttpServletRequest request) {
         validateToken(request);
         service.createFile(fileRequest);
         return new ResponseEntity<CommonResponse<String>>(
-            new CommonResponse<String>(true, null, "Create file successfully!",
-                            HttpStatus.OK.value()),
-            null,
-            HttpStatus.OK.value());
+                new CommonResponse<String>(true, null, "Create file successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
-    @GetMapping(value = "user/get-files/")
+    @GetMapping(value = "user/get-files")
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<CommonResponse<ListWrapperResponse<FileResponse>>> getFilesByUserId(
-        @RequestParam(required = false, defaultValue = "1") int page,
-        @RequestParam(required = false, defaultValue = "10") int pageSize,
-        @RequestParam Map<String, String> allParams,
-        @RequestParam(defaultValue = "asc") String keySort,
-        @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request
-    ) {
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int pageSize,
+            @RequestParam Map<String, String> allParams,
+            @RequestParam(defaultValue = "asc") String keySort,
+            @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
         validateToken(request);
         String userId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                        JWT_SECRET);
+                JWT_SECRET);
         return response(service.getFilesByUserId(
-            userId,
-            page,
-            pageSize,
-            allParams,
-            keySort,
-            sortField
-        ), "Success");
+                userId,
+                page,
+                pageSize,
+                allParams,
+                keySort,
+                sortField), "Success");
     }
-    
-    @GetMapping(value = "user/get-file/{fileId}")
+
+    @GetMapping(value = "user/get-file")
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<CommonResponse<FileResponse>> getFilesByFileId(@PathVariable String fileId, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<FileResponse>> getFilesByFileId(@RequestParam(required = true) String fileId,
+            HttpServletRequest request) {
         validateToken(request);
         return response(service.getFileById(fileId), "Success");
     }
 
-    @DeleteMapping(value = "user/delete-file/{_id}")
+    @DeleteMapping(value = "user/delete-file")
     @SecurityRequirement(name = "Bear Authentication")
-    public ResponseEntity<CommonResponse<String>> deleteFileUser(@PathVariable String _id, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> deleteFileUser(@RequestParam(required = true) String _id,
+            HttpServletRequest request) {
         validateToken(request);
         String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                JWT_SECRET);
         service.deleteFileUsers(_id, loginId);
         return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Delete file successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
+                new CommonResponse<String>(true, null, "Delete file successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 
-    @DeleteMapping(value = "admin/delete-file/{_id}")
+    @DeleteMapping(value = "admin/delete-file")
     @SecurityRequirement(name = "Bear Authentication")
-    public ResponseEntity<CommonResponse<String>> deleteFileAdmin(@PathVariable String _id, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<String>> deleteFileAdmin(@RequestParam(required = true) String _id,
+            HttpServletRequest request) {
         validateToken(request);
         service.deleteFileAdmins(_id);
         return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Delete file successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
+                new CommonResponse<String>(true, null, "Delete file successfully!",
+                        HttpStatus.OK.value()),
+                null,
+                HttpStatus.OK.value());
     }
 }

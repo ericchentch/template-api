@@ -11,6 +11,5 @@ public class FeatureResponse {
     private String _id;
     private String name;
     private String path;
-    private String created;
     private int deleted;
 }

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import edunhnil.project.forum.api.constant.DateTime;
 import edunhnil.project.forum.api.dao.featureRepository.Feature;
 import edunhnil.project.forum.api.dao.featureRepository.FeatureRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
@@ -16,7 +15,6 @@ import edunhnil.project.forum.api.dto.featureDTO.FeatureResponse;
 import edunhnil.project.forum.api.exception.InvalidRequestException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
-import edunhnil.project.forum.api.utils.DateFormat;
 
 @Service
 public class FeatureServiceImpl extends AbstractService<FeatureRepository> implements FeatureService {
@@ -27,7 +25,7 @@ public class FeatureServiceImpl extends AbstractService<FeatureRepository> imple
         List<Feature> features = repository.getFeatures(allParams, keySort, page, pageSize, sortField).get();
         return Optional.of(new ListWrapperResponse<FeatureResponse>(
                 features.stream().map(f -> new FeatureResponse(f.get_id().toString(), f.getName(), f.getPath(),
-                        f.getCreated(), f.getDeleted())).collect(Collectors.toList()),
+                        f.getDeleted())).collect(Collectors.toList()),
                 page, pageSize, features.size()));
     }
 
@@ -38,7 +36,6 @@ public class FeatureServiceImpl extends AbstractService<FeatureRepository> imple
             throw new InvalidRequestException("This feature existed");
         }
         Feature feature = objectMapper.convertValue(featureRequest, Feature.class);
-        feature.setCreated(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
         repository.insertAndUpdate(feature);
     }
 

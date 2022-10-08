@@ -1,5 +1,6 @@
 package edunhnil.project.forum.api.dao.permissionRepository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -18,6 +19,6 @@ public class Permission {
     private String name;
     private List<ObjectId> featureId;
     private List<ObjectId> userId;
-    private String created;
-    private String modified;
+    private Date created;
+    private Date modified;
 }

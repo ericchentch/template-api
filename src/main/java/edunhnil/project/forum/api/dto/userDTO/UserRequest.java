@@ -77,12 +77,6 @@ public class UserRequest {
     @Pattern(regexp = FormInput.EMAIL, message = "Email is invalid")
     private String email;
 
-    @Schema(type = "string", example = "ROLE_USER")
-    @NotEmpty(message = "Role is required!")
-    @NotBlank(message = "Role is required!")
-    @NotNull(message = "Role is required!")
-    private String role;
-
     @Min(value = 0)
     @Max(value = 1)
     @NotNull(message = "Deleted is required!")

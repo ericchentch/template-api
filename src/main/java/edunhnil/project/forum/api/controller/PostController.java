@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,8 +60,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "admin/get-post/{postId}")
-        public ResponseEntity<CommonResponse<PostResponse>> getPostAdmin(@PathVariable int postId,
+        @GetMapping(value = "admin/get-post")
+        public ResponseEntity<CommonResponse<PostResponse>> getPostAdmin(@RequestParam(required = true) int postId,
                         HttpServletRequest request) {
                 validateToken(request);
                 String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
@@ -71,8 +70,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "user/get-post/{postId}")
-        public ResponseEntity<CommonResponse<PostResponse>> getPostUser(@PathVariable int postId,
+        @GetMapping(value = "user/get-post")
+        public ResponseEntity<CommonResponse<PostResponse>> getPostUser(@RequestParam(required = true) int postId,
                         HttpServletRequest request) {
                 validateToken(request);
                 String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
@@ -80,8 +79,8 @@ public class PostController extends AbstractController<PostService> {
                 return response(service.getPrivatePost(postId, loginId), "Get post successfully!");
         }
 
-        @GetMapping(value = "public/get-post/{postId}")
-        public ResponseEntity<CommonResponse<PostResponse>> getPostPublic(@PathVariable int postId) {
+        @GetMapping(value = "public/get-post")
+        public ResponseEntity<CommonResponse<PostResponse>> getPostPublic(@RequestParam(required = true) int postId) {
                 return response(service.getPostById(postId), "Get post successfully!");
         }
 
@@ -101,8 +100,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/update-post/{postId}")
-        public ResponseEntity<CommonResponse<String>> updatePost(@PathVariable int postId,
+        @PutMapping(value = "user/update-post")
+        public ResponseEntity<CommonResponse<String>> updatePost(@RequestParam(required = true) int postId,
                         @RequestBody PostRequest postUpdateReq,
                         HttpServletRequest request) {
                 validateToken(request);
@@ -117,8 +116,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "admin/delete-post/{postId}")
-        public ResponseEntity<CommonResponse<String>> deletePostAdmin(@PathVariable int postId,
+        @DeleteMapping(value = "admin/delete-post")
+        public ResponseEntity<CommonResponse<String>> deletePostAdmin(@RequestParam(required = true) int postId,
                         HttpServletRequest request) {
                 validateToken(request);
                 service.deleteAdminPostById(postId);
@@ -130,8 +129,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "user/delete-post/{postId}")
-        public ResponseEntity<CommonResponse<String>> deletePostUser(@PathVariable int postId,
+        @DeleteMapping(value = "user/delete-post")
+        public ResponseEntity<CommonResponse<String>> deletePostUser(@RequestParam(required = true) int postId,
                         HttpServletRequest request) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
@@ -145,8 +144,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "admin/change-enabled/{postId}")
-        public ResponseEntity<CommonResponse<String>> changeEnabledAdmin(@PathVariable int postId,
+        @PutMapping(value = "admin/change-enabled")
+        public ResponseEntity<CommonResponse<String>> changeEnabledAdmin(@RequestParam(required = true) int postId,
                         @RequestParam(required = true, defaultValue = "0") int input,
                         HttpServletRequest request) {
                 validateToken(request);
@@ -159,8 +158,8 @@ public class PostController extends AbstractController<PostService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/change-enabled/{postId}")
-        public ResponseEntity<CommonResponse<String>> changeEnabledUser(@PathVariable int postId,
+        @PutMapping(value = "user/change-enabled")
+        public ResponseEntity<CommonResponse<String>> changeEnabledUser(@RequestParam(required = true) int postId,
                         @RequestParam(required = true, defaultValue = "0") int input,
                         HttpServletRequest request) {
                 validateToken(request);

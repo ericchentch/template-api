@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import edunhnil.project.forum.api.constant.DateTime;
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
@@ -85,8 +84,8 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                 userRequest.setPassword(passwordEncode);
                 User user = objectMapper.convertValue(userRequest, User.class);
                 user.setToken("");
-                user.setCreated(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
-                user.setModified("");
+                user.setCreated(DateFormat.getCurrentTime());
+                user.setModified(null);
                 repository.insertAndUpdate(user);
         }
 
@@ -99,7 +98,7 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                 User user = objectMapper.convertValue(userRequest, User.class);
                 user.setToken(oldUser.getToken());
                 user.setCreated(oldUser.getCreated());
-                user.setModified(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
+                user.setModified(DateFormat.getCurrentTime());
                 repository.insertAndUpdate(user);
         }
 
@@ -109,7 +108,7 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                                 () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
                 User user = objectMapper.convertValue(oldUser, User.class);
                 user.setDeleted(1);
-                user.setModified(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
+                user.setModified(DateFormat.getCurrentTime());
                 repository.insertAndUpdate(user);
         }
 
@@ -126,7 +125,7 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                         throw new InvalidRequestException("Old password does not match!");
                 }
                 user.setPassword(bCryptPasswordEncoder.encode(changePassword.getNewPassword()));
-                user.setModified(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
+                user.setModified(DateFormat.getCurrentTime());
                 repository.insertAndUpdate(user);
         }
 
@@ -139,7 +138,7 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                         throw new InvalidRequestException("Old username is not match!");
                 }
                 user.setUsername(changeUsername.getNewUsername());
-                user.setModified(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
+                user.setModified(DateFormat.getCurrentTime());
                 repository.insertAndUpdate(user);
         }
 

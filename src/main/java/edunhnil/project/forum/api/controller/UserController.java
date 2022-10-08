@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,9 +59,9 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "admin/get-detail-user/{id}")
+        @GetMapping(value = "admin/get-detail-user")
         public ResponseEntity<CommonResponse<UserResponse>> getUserById(HttpServletRequest request,
-                        @PathVariable String id) {
+                        @RequestParam(required = true) String id) {
                 validateToken(request);
                 return response(service.getUserById(id), "Get user successfully!");
         }
@@ -90,9 +89,9 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "admin/update-user/{userId}")
+        @PutMapping(value = "admin/update-user")
         public ResponseEntity<CommonResponse<String>> updateUserAdmin(@RequestBody UserRequest userRequest,
-                        @PathVariable(required = true) String userId,
+                        @RequestParam(required = true) String userId,
                         HttpServletRequest request) {
                 validateToken(request);
                 service.updateUserById(userRequest, userId);
@@ -104,9 +103,9 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "admin/delete-user/{userId}")
+        @DeleteMapping(value = "admin/delete-user")
         public ResponseEntity<CommonResponse<String>> deleteUserUser(HttpServletRequest request,
-                        @PathVariable(required = true) String userId) {
+                        @RequestParam(required = true) String userId) {
                 validateToken(request);
                 service.deleteUserById(userId);
                 return new ResponseEntity<CommonResponse<String>>(

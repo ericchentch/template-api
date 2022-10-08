@@ -4,9 +4,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
@@ -23,8 +23,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class LikeController extends AbstractController<LikeService> {
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PostMapping(value = "user/update-like-post/{postId}")
-        public ResponseEntity<CommonResponse<String>> likePost(HttpServletRequest request, @PathVariable int postId) {
+        @PostMapping(value = "user/update-like-post")
+        public ResponseEntity<CommonResponse<String>> likePost(HttpServletRequest request,
+                        @RequestParam(required = true) int postId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
@@ -37,9 +38,9 @@ public class LikeController extends AbstractController<LikeService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PostMapping(value = "user/update-like-comment/{commentId}")
+        @PostMapping(value = "user/update-like-comment")
         public ResponseEntity<CommonResponse<String>> likeComment(HttpServletRequest request,
-                        @PathVariable int commentId) {
+                        @RequestParam(required = true) int commentId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);

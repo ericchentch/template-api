@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -75,10 +74,10 @@ public class CommentController extends AbstractController<CommentService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PostMapping(value = "user/add-new-comment/{postId}")
+        @PostMapping(value = "user/add-new-comment")
         public ResponseEntity<CommonResponse<String>> addNewComment(@RequestBody CommentRequest commentRequest,
                         HttpServletRequest request,
-                        @PathVariable int postId) {
+                        @RequestParam(required = true) int postId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
                 service.addNewComment(commentRequest, postId, id);
@@ -90,10 +89,10 @@ public class CommentController extends AbstractController<CommentService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/edit-comment/{commentId}")
+        @PutMapping(value = "user/edit-comment")
         public ResponseEntity<CommonResponse<String>> editComment(@RequestBody CommentRequest commentRequest,
                         HttpServletRequest request,
-                        @PathVariable int commentId) {
+                        @RequestParam(required = true) int commentId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
                 service.editCommentById(commentRequest, commentId, id);
@@ -105,8 +104,8 @@ public class CommentController extends AbstractController<CommentService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "user/delete-comment/{commentId}")
-        public ResponseEntity<CommonResponse<String>> userDeleteComment(@PathVariable int commentId,
+        @DeleteMapping(value = "user/delete-comment")
+        public ResponseEntity<CommonResponse<String>> userDeleteComment(@RequestParam(required = true) int commentId,
                         HttpServletRequest request) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
@@ -119,8 +118,8 @@ public class CommentController extends AbstractController<CommentService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "admin/delete-comment/{commentId}")
-        public ResponseEntity<CommonResponse<String>> adminDeleteComment(@PathVariable int commentId,
+        @DeleteMapping(value = "admin/delete-comment")
+        public ResponseEntity<CommonResponse<String>> adminDeleteComment(@RequestParam(required = true) int commentId,
                         HttpServletRequest request) {
                 validateToken(request);
                 service.deleteAdminComment(commentId);

@@ -46,8 +46,8 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
                                         .map(feature -> feature.toString()).collect(Collectors.toList())),
                                 generateUserList(permission.getUserId().stream().map(userId -> userId.toString())
                                         .collect(Collectors.toList())),
-                                permission.getCreated(),
-                                permission.getModified()))
+                                DateFormat.toDateString(permission.getCreated(), DateTime.YYYY_MM_DD),
+                                DateFormat.toDateString(permission.getModified(), DateTime.YYYY_MM_DD)))
                         .collect(Collectors.toList()),
                 page, pageSize, permissions.size()));
     }
@@ -63,7 +63,7 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
         }
         Permission permission = new Permission();
         permission.setName(permissionRequest.getName());
-        permission.setCreated(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
+        permission.setCreated(DateFormat.getCurrentTime());
         if (permissionRequest.getFeatureId().size() != 0) {
             List<FeatureResponse> featureResponse = generateFeatureList(permissionRequest.getFeatureId());
             permission.setFeatureId(
@@ -105,7 +105,7 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
         } else {
             permission.setUserId(new ArrayList<>());
         }
-        permission.setModified(DateFormat.toDateString(DateFormat.getCurrentTime(), DateTime.YYYY_MM_DD));
+        permission.setModified(DateFormat.getCurrentTime());
         repository.insertAndUpdate(permission);
     }
 

@@ -2,6 +2,7 @@ package edunhnil.project.forum.api.utils;
 
 import org.springframework.stereotype.Component;
 
+import edunhnil.project.forum.api.constant.DateTime;
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
 
@@ -11,7 +12,6 @@ public class UserUtils {
     public UserResponse generateUserResponse(User user, String type) {
         if (type.compareTo("public") == 0) {
             return new UserResponse(user.get_id().toString(),
-                    "",
                     "",
                     "",
                     user.getGender(),
@@ -31,7 +31,6 @@ public class UserUtils {
             return new UserResponse(user.get_id().toString(),
                     user.getUsername(),
                     user.getPassword(),
-                    user.getRole(),
                     user.getGender(),
                     user.getDob(),
                     user.getAddress(),
@@ -42,8 +41,8 @@ public class UserUtils {
                     user.getToken(),
                     user.isVerified(),
                     user.isVerify2FA(),
-                    user.getCreated(),
-                    user.getModified(),
+                    DateFormat.toDateString(user.getCreated(), DateTime.YYYY_MM_DD),
+                    DateFormat.toDateString(user.getModified(), DateTime.YYYY_MM_DD),
                     user.getDeleted());
         }
     }

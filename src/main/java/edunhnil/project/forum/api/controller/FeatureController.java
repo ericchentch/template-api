@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,9 +53,9 @@ public class FeatureController extends AbstractController<FeatureService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "update-feature/{id}")
+        @PutMapping(value = "update-feature")
         public ResponseEntity<CommonResponse<String>> updateFeature(
-                        @RequestBody FeatureRequest featureRequest, @PathVariable String id,
+                        @RequestBody FeatureRequest featureRequest, @RequestParam(required = true) String id,
                         HttpServletRequest request) {
                 validateToken(request);
                 service.editFeature(featureRequest, id);
@@ -68,9 +67,9 @@ public class FeatureController extends AbstractController<FeatureService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "delete-feature/{id}")
+        @DeleteMapping(value = "delete-feature")
         public ResponseEntity<CommonResponse<String>> updateFeature(
-                        @PathVariable String id, HttpServletRequest request) {
+                        @RequestParam(required = true) String id, HttpServletRequest request) {
                 validateToken(request);
                 service.deleteFeature(id);
                 return new ResponseEntity<CommonResponse<String>>(
