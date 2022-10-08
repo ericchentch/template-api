@@ -13,7 +13,7 @@ public class DateFormat {
 
     public static String toDateString(Date date, String format) {
         if (date == null)
-            return null;
+            return "";
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         String result = null;
         try {

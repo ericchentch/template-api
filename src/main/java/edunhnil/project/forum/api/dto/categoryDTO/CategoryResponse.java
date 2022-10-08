@@ -14,4 +14,14 @@ public class CategoryResponse {
     private String path;
     private int postsNumber;
     private PostResponse newestPost;
+
+    public CategoryResponse(int id,
+            String categoryName,
+            String path,
+            int postsNumber) {
+        this.categoryName = categoryName;
+        this.id = id;
+        this.path = path;
+        this.postsNumber = postsNumber;
+    }
 }
