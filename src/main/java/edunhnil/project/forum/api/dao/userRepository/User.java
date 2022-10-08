@@ -17,7 +17,6 @@ public class User {
     private ObjectId _id;
     private String username;
     private String password;
-    private String role;
     private int gender;
     private String dob;
     private String address;
@@ -26,8 +25,8 @@ public class User {
     private String email;
     private String phone;
     private String token;
-    private String created;
-    private String modified;
+    private Date created;
+    private Date modified;
     private String code;
     private boolean verified;
     private boolean verify2FA;

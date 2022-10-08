@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,9 +53,9 @@ public class PermissionController extends AbstractController<PermissionService> 
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "update-permission/{id}")
+        @PutMapping(value = "update-permission")
         public ResponseEntity<CommonResponse<String>> updateFeature(
-                        @RequestBody PermissionRequest permissionRequest, @PathVariable String id,
+                        @RequestBody PermissionRequest permissionRequest, @RequestParam(required = true) String id,
                         HttpServletRequest request) {
                 validateToken(request);
                 service.editPermission(permissionRequest, id);
@@ -68,9 +67,9 @@ public class PermissionController extends AbstractController<PermissionService> 
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "delete-permission/{id}")
+        @DeleteMapping(value = "delete-permission")
         public ResponseEntity<CommonResponse<String>> updateFeature(
-                        @PathVariable String id, HttpServletRequest request) {
+                        @RequestParam(required = true) String id, HttpServletRequest request) {
                 validateToken(request);
                 service.deletePermission(id);
                 return new ResponseEntity<CommonResponse<String>>(

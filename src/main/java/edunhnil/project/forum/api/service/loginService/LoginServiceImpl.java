@@ -98,7 +98,6 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             String passwordEncode = bCryptPasswordEncoder().encode(registerRequest.getPassword());
             User user = objectMapper.convertValue(registerRequest, User.class);
             user.setPassword(passwordEncode);
-            user.setRole("ROLE_USER");
             user.setToken("");
             user.setCode(CodeGenerator.userCodeGenerator());
             Date now = new Date();

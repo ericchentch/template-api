@@ -15,6 +15,5 @@ public class Feature {
     private ObjectId _id;
     private String name;
     private String path;
-    private String created;
     private int deleted;
 }
