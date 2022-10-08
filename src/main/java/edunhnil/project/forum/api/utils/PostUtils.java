@@ -4,23 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import edunhnil.project.forum.api.constant.DateTime;
 import edunhnil.project.forum.api.dao.likeRepository.LikeRepository;
 import edunhnil.project.forum.api.dao.postRepository.Post;
+import edunhnil.project.forum.api.dao.userRepository.User;
+import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.categoryDTO.CategoryResponse;
 import edunhnil.project.forum.api.dto.postDTO.PostResponse;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
 import edunhnil.project.forum.api.service.categoryService.CategoryService;
-import edunhnil.project.forum.api.service.userService.UserService;
 
 @Component
 public class PostUtils {
 
         @Autowired
-        private UserService userService;
+        private UserRepository userRepository;
 
         @Autowired
         private CategoryService categoryService;
@@ -28,9 +30,11 @@ public class PostUtils {
         @Autowired
         private LikeRepository likeRepository;
 
+        @Autowired
+        private UserUtils userUtils;
+
         public PostResponse generatePostResponse(Post p, String type, String loginId) {
 
-                UserResponse author = userService.getPublicUserById(p.getAuthorId()).get();
                 Optional<CategoryResponse> categorySerRes = categoryService.getCategoryDetailById(p.getCategoryId());
                 CategoryResponse category = categorySerRes.get();
 
@@ -46,7 +50,7 @@ public class PostUtils {
 
                 if (type.compareTo("public") == 0) {
                         return new PostResponse(p.getId(), p.getAuthorId(),
-                                        author,
+                                        returnUser(p.getAuthorId(), type),
                                         p.getTitle(),
                                         p.getContent(),
                                         p.getView(),
@@ -62,7 +66,7 @@ public class PostUtils {
                                         0);
                 } else {
                         return new PostResponse(p.getId(), p.getAuthorId(),
-                                        author,
+                                        returnUser(p.getAuthorId(), type),
                                         p.getTitle(),
                                         p.getContent(),
                                         p.getView(),
@@ -76,6 +80,20 @@ public class PostUtils {
                                         likeRepository.getTotalLike(paramsLiked) != 0,
                                         p.getEnabled(),
                                         p.getDeleted());
+                }
+        }
+
+        private UserResponse returnUser(String userId, String type) {
+                Optional<User> user = userRepository.getUserById(userId);
+                User deletedUser = new User(new ObjectId(userId), "", "", 0, "", "", "Deleted user", "", "", "", "",
+                                null,
+                                null, "",
+                                false,
+                                false, null, 0);
+                if (user.isEmpty()) {
+                        return userUtils.generateUserResponse(deletedUser, type);
+                } else {
+                        return userUtils.generateUserResponse(user.get(), type);
                 }
         }
 }

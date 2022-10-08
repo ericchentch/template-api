@@ -48,7 +48,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                                 posts.size(), newestPost));
                         } else {
                                 result.add(new CategoryResponse(c.getId(), c.getCategoryName(), c.getPath(),
-                                                posts.size(), null));
+                                                posts.size()));
                         }
                 }
                 return Optional.of(result);
@@ -86,7 +86,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                         return Optional.of(new CategoryResponse(category.getId(),
                                         category.getCategoryName(),
                                         category.getPath(),
-                                        posts.size(), null));
+                                        posts.size()));
                 }
         }
 
@@ -99,12 +99,12 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                         return Optional.of(new CategoryResponse(0,
                                         "Deleted category",
                                         "",
-                                        0, null));
+                                        0));
                 Category category = categories.get(0);
                 return Optional.of(new CategoryResponse(category.getId(),
                                 category.getCategoryName(),
                                 category.getPath(),
-                                0, null));
+                                0));
         }
 
 }
