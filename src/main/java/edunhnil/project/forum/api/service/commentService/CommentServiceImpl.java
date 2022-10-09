@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +34,17 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         private CommentUtils commentUtils;
 
         @Override
-        public Optional<ListWrapperResponse<CommentResponse>> getPublicComment(int postId, int page,
+        public Optional<ListWrapperResponse<CommentResponse>> getPublicComment(String postId, int page,
                         String keySort, String sortField, String loginId) {
                 Map<String, String> allParams = new HashMap<String, String>();
-                allParams.put("postId", Integer.toString(postId));
+                allParams.put("postId", postId);
                 List<Comment> comments = repository
                                 .getAllComment(allParams, keySort, page, 5, sortField)
                                 .get();
                 return Optional.of(new ListWrapperResponse<CommentResponse>(comments.stream()
                                 .map(c -> commentUtils.generateCommentResponse(c, "public", loginId))
                                 .collect(Collectors.toList()), page, 5,
-                                repository.getTotalCommentPost(allParams)));
+                                comments.size()));
         }
 
         @Override
@@ -60,21 +61,21 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                                                                 .map(c -> commentUtils.generateCommentResponse(c,
                                                                                 "", loginId))
                                                                 .collect(Collectors.toList()),
-                                                page, pageSize,
-                                                repository.getTotalCommentPost(allParams)));
+                                                page, pageSize, comments.size()));
         }
 
         @Override
-        public void addNewComment(CommentRequest commentRequest, int postId, String ownerId) {
+        public void addNewComment(CommentRequest commentRequest, String postId, String ownerId) {
                 validate(commentRequest);
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(postId));
+                postIds.put("id", postId);
                 List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "").get();
                 if (posts.size() == 0) {
                         throw new ResourceNotFoundException("Not found post with id: " +
                                         postId);
                 }
                 Comment comment = objectMapper.convertValue(commentRequest, Comment.class);
+                comment.setId(UUID.randomUUID().toString());
                 comment.setPostId(postId);
                 comment.setOwnerId(ownerId);
                 comment.setCreated(DateFormat.getCurrentTime());
@@ -83,10 +84,10 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         }
 
         @Override
-        public void editCommentById(CommentRequest commentRequest, int id, String loginId) {
+        public void editCommentById(CommentRequest commentRequest, String id, String loginId) {
                 validate(commentRequest);
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", Integer.toString(id));
+                allParams.put("id", id);
                 List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
                                 .get();
                 if (comments.size() == 0) {
@@ -102,9 +103,9 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         }
 
         @Override
-        public void deleteUserComment(int id, String loginId) {
+        public void deleteUserComment(String id, String loginId) {
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", Integer.toString(id));
+                allParams.put("id", id);
                 List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
                                 .get();
                 if (comments.size() == 0) {
@@ -120,9 +121,9 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         }
 
         @Override
-        public void deleteAdminComment(int id) {
+        public void deleteAdminComment(String id) {
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", Integer.toString(id));
+                allParams.put("id", id);
                 List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
                                 .get();
                 if (comments.size() == 0) {

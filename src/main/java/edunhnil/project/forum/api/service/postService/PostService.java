@@ -16,20 +16,20 @@ public interface PostService {
                         String keySort, int page,
                         int pageSize, String sortField);
 
-        Optional<PostResponse> getPrivatePost(int id, String loginId);
+        Optional<PostResponse> getPrivatePost(String id, String loginId);
 
-        Optional<PostResponse> getPostById(int id);
+        Optional<PostResponse> getPostById(String id);
 
-        void updatePostById(PostRequest req, int id, String loginId);
+        void updatePostById(PostRequest req, String id, String loginId);
 
         void addNewPost(PostRequest postRequest, String authorId);
 
-        void deleteUserPostById(int id, String loginId);
+        void deleteUserPostById(String id, String loginId);
 
-        void deleteAdminPostById(int id);
+        void deleteAdminPostById(String id);
 
-        void changeUserEnabled(int input, int id, String loginId);
+        void changeUserEnabled(int input, String id, String loginId);
 
-        void changeAdminEnabled(int input, int id);
+        void changeAdminEnabled(int input, String id);
 
 }

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Category {
-    private int id;
+    private String id;
     private String categoryName;
-    private String path;
 }

@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentResponse {
-    private int id;
+    private String id;
     private String ownerId;
     private UserResponse informationOwner;
-    private int postId;
+    private String postId;
     private String content;
     private int like;
     private String created;

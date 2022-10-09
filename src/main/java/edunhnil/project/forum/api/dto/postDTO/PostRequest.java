@@ -1,6 +1,5 @@
 package edunhnil.project.forum.api.dto.postDTO;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -27,9 +26,10 @@ public class PostRequest {
     @NotNull(message = "content is required")
     private String content;
 
-    @Schema(type = "int", example = "0")
-    @Min(value = 0)
+    @Schema(type = "string", example = " ")
+    @NotEmpty(message = "category id is required")
+    @NotBlank(message = "category id is required")
     @NotNull(message = "category id is required")
-    private int categoryId;
+    private String categoryId;
 
 }

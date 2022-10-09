@@ -54,16 +54,27 @@ public abstract class AbstractRepository {
         }
     }
 
+    protected String getPrefixSelect(String name) {
+        String[] check = { "like", "post", "comment" };
+        for (String field : check) {
+            if (name.compareTo(field) == 0)
+                return "forum.";
+        }
+        return "";
+    }
+
     protected <T> void save(T entity, String[] ignoreFields) {
         StringBuilder sql = new StringBuilder();
         try {
             Field fieldId = entity.getClass().getDeclaredField("id");
             fieldId.setAccessible(true);
             jdbcTemplate.queryForObject(
-                    "SELECT * FROM forum." + entity.getClass().getSimpleName().toLowerCase() + " WHERE id = "
-                            + fieldId.get(entity),
+                    "SELECT * FROM " + getPrefixSelect(entity.getClass().getSimpleName().toLowerCase())
+                            + entity.getClass().getSimpleName().toLowerCase() + " WHERE id = "
+                            + "'" + fieldId.get(entity) + "'",
                     new BeanPropertyRowMapper<>(entity.getClass()));
-            sql.append("UPDATE forum." + entity.getClass().getSimpleName().toLowerCase() + " SET ");
+            sql.append("UPDATE " + getPrefixSelect(entity.getClass().getSimpleName().toLowerCase())
+                    + entity.getClass().getSimpleName().toLowerCase() + " SET ");
             Field[] fields = entity.getClass().getDeclaredFields();
             for (int i = 0; i < fields.length; i++) {
                 fields[i].setAccessible(true);
@@ -101,18 +112,15 @@ public abstract class AbstractRepository {
                     sql.append(",");
                 }
             }
-            sql.append(" WHERE id=" + fieldId.get(entity));
+            sql.append(" WHERE id='" + fieldId.get(entity) + "'");
         } catch (EmptyResultDataAccessException | NoSuchFieldException | IllegalArgumentException
                 | IllegalAccessException e) {
             APP_LOGGER.info(e.getLocalizedMessage());
             StringBuilder fieldInsert = new StringBuilder();
             StringBuilder valueInsert = new StringBuilder();
             Field[] fields = entity.getClass().getDeclaredFields();
-            int max = getMax("SELECT MAX(id) FROM forum." + entity.getClass().getSimpleName().toLowerCase()) + 1;
-            String resetCount = "ALTER SEQUENCE forum." + entity.getClass().getSimpleName().toLowerCase()
-                    + "_id_seq RESTART WITH " + max;
-            jdbcTemplate.execute(resetCount);
-            sql.append("INSERT INTO forum." + entity.getClass().getSimpleName().toLowerCase());
+            sql.append("INSERT INTO " + getPrefixSelect(entity.getClass().getSimpleName().toLowerCase())
+                    + entity.getClass().getSimpleName().toLowerCase());
             fieldInsert.append(" (");
             valueInsert.append(" (");
             for (int i = 0; i < fields.length; i++) {
@@ -162,7 +170,7 @@ public abstract class AbstractRepository {
             valueInsert.append(")");
             sql.append(fieldInsert.toString() + " VALUES " + valueInsert.toString());
         } catch (BadSqlGrammarException e) {
-            APP_LOGGER.error("Bad SQL: " + sql);
+            APP_LOGGER.error("Bad SQL: " + sql.toString());
             throw new InternalServerException("something went wrong");
         }
         try {

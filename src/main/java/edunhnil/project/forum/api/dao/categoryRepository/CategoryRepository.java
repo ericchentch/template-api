@@ -6,4 +6,9 @@ import java.util.Optional;
 
 public interface CategoryRepository {
     Optional<List<Category>> getCategories(Map<String, String> allParams);
+
+    void saveCategory(Category category);
+
+    void deleteCategory(String id);
+
 }

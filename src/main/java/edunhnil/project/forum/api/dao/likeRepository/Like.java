@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Like {
-    private int id;
+    private String id;
     private String ownerId;
-    private int targetId;
+    private String targetId;
     private String type;
     private Date created;
     private int deleted;

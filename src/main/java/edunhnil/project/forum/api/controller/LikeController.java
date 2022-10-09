@@ -25,7 +25,7 @@ public class LikeController extends AbstractController<LikeService> {
         @SecurityRequirement(name = "Bearer Authentication")
         @PostMapping(value = "user/update-like-post")
         public ResponseEntity<CommonResponse<String>> likePost(HttpServletRequest request,
-                        @RequestParam(required = true) int postId) {
+                        @RequestParam(required = true) String postId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
@@ -40,7 +40,7 @@ public class LikeController extends AbstractController<LikeService> {
         @SecurityRequirement(name = "Bearer Authentication")
         @PostMapping(value = "user/update-like-comment")
         public ResponseEntity<CommonResponse<String>> likeComment(HttpServletRequest request,
-                        @RequestParam(required = true) int commentId) {
+                        @RequestParam(required = true) String commentId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);

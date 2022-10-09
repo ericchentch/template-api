@@ -22,14 +22,8 @@ public class PostRepositoryImpl extends AbstractRepository implements PostReposi
     }
 
     @Override
-    public int getTotalPage(Map<String, String> allParams) {
-        return getTotal(allParams, Post.class);
-    }
-
-    @Override
     public void savePost(Post post) {
-        System.out.println(post);
-        String[] ignores = { "id", "modified" };
+        String[] ignores = { "modified" };
         save(post, ignores);
     }
 

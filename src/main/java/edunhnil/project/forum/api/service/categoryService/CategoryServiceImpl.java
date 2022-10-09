@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,10 @@ import edunhnil.project.forum.api.dao.categoryRepository.Category;
 import edunhnil.project.forum.api.dao.categoryRepository.CategoryRepository;
 import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.postRepository.PostRepository;
+import edunhnil.project.forum.api.dto.categoryDTO.CategoryRequest;
 import edunhnil.project.forum.api.dto.categoryDTO.CategoryResponse;
 import edunhnil.project.forum.api.dto.postDTO.PostResponse;
+import edunhnil.project.forum.api.exception.InvalidRequestException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
 import edunhnil.project.forum.api.utils.PostUtils;
@@ -36,7 +39,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                 List<CategoryResponse> result = new ArrayList<>();
                 for (Category c : categories) {
                         Map<String, String> allParams = new HashMap<String, String>();
-                        allParams.put("categoryId", Integer.toString(c.getId()));
+                        allParams.put("categoryId", c.getId());
                         allParams.put("deleted", "0");
                         allParams.put("enabled", "0");
                         List<Post> posts = postRepository
@@ -44,10 +47,10 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                         .orElseThrow(() -> new ResourceNotFoundException("Not found any post"));
                         if (posts.size() != 0) {
                                 PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public", "");
-                                result.add(new CategoryResponse(c.getId(), c.getCategoryName(), c.getPath(),
+                                result.add(new CategoryResponse(c.getId(), c.getCategoryName(),
                                                 posts.size(), newestPost));
                         } else {
-                                result.add(new CategoryResponse(c.getId(), c.getCategoryName(), c.getPath(),
+                                result.add(new CategoryResponse(c.getId(), c.getCategoryName(),
                                                 posts.size()));
                         }
                 }
@@ -55,21 +58,20 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
         }
 
         @Override
-        public Optional<CategoryResponse> getCategoryById(int id) {
+        public Optional<CategoryResponse> getCategoryById(String id) {
                 Map<String, String> ids = new HashMap<>();
-                ids.put("id", Integer.toString(id));
+                ids.put("id", id);
                 List<Category> categories = repository.getCategories(ids).get();
                 System.out.println(categories.size());
                 if (categories.size() == 0)
-                        return Optional.of(new CategoryResponse(0,
+                        return Optional.of(new CategoryResponse("",
                                         "Deleted category",
-                                        "",
                                         0, null));
                 Category category = categories.get(0);
                 List<String> searchField = new ArrayList<>();
                 searchField.add("category_id");
                 Map<String, String> allParams = new HashMap<String, String>();
-                allParams.put("category_id", Integer.toString(category.getId()));
+                allParams.put("category_id", category.getId());
                 allParams.put("deleted", "0");
                 allParams.put("enabled", "0");
                 List<Post> posts = postRepository.getPostsByAuthorId(allParams, "DESC", 1,
@@ -79,32 +81,65 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                         PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public", "");
                         return Optional.of(new CategoryResponse(category.getId(),
                                         category.getCategoryName(),
-                                        category.getPath(),
                                         posts.size(),
                                         newestPost));
                 } else {
                         return Optional.of(new CategoryResponse(category.getId(),
                                         category.getCategoryName(),
-                                        category.getPath(),
                                         posts.size()));
                 }
         }
 
         @Override
-        public Optional<CategoryResponse> getCategoryDetailById(int id) {
+        public Optional<CategoryResponse> getCategoryDetailById(String id) {
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", Integer.toString(id));
+                allParams.put("id", id);
                 List<Category> categories = repository.getCategories(allParams).get();
                 if (categories.size() == 0)
-                        return Optional.of(new CategoryResponse(0,
+                        return Optional.of(new CategoryResponse("",
                                         "Deleted category",
-                                        "",
                                         0));
                 Category category = categories.get(0);
                 return Optional.of(new CategoryResponse(category.getId(),
-                                category.getCategoryName(),
-                                category.getPath(),
-                                0));
+                                category.getCategoryName(), 0));
+        }
+
+        @Override
+        public void saveCategory(CategoryRequest categoryRequest) {
+                validate(categoryRequest);
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("categoryName", categoryRequest.getName());
+                List<Category> categories = repository.getCategories(allParams).get();
+                if (categories.size() != 0) {
+                        throw new InvalidRequestException("This name is not available!");
+                }
+                Category category = new Category(UUID.randomUUID().toString(), categoryRequest.getName());
+                repository.saveCategory(category);
+        }
+
+        @Override
+        public void deleteCategory(String id) {
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", id);
+                List<Category> categories = repository.getCategories(allParams).get();
+                if (categories.size() != 0) {
+                        throw new ResourceNotFoundException("This category is not available!");
+                }
+                repository.deleteCategory(id);
+        }
+
+        @Override
+        public void updateCategory(CategoryRequest categoryRequest, String id) {
+                validate(categoryRequest);
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("id", id);
+                List<Category> categories = repository.getCategories(allParams).get();
+                if (categories.size() != 0) {
+                        throw new ResourceNotFoundException("This category is not available!");
+                }
+                Category category = categories.get(0);
+                category.setCategoryName(categoryRequest.getName());
+                repository.saveCategory(category);
         }
 
 }

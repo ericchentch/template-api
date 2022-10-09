@@ -3,6 +3,7 @@ package edunhnil.project.forum.api.service.likeService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,12 +33,12 @@ public class LikeServiceImpl extends AbstractService<LikeRepository>
     private CommentRepository commentRepository;
 
     @Override
-    public void saveCommentLike(String ownerId, int commentId) {
+    public void saveCommentLike(String ownerId, String commentId) {
         checkOwnerId(ownerId);
         checkCommentId(commentId);
         Map<String, String> allParams = new HashMap<>();
         allParams.put("ownerId", ownerId);
-        allParams.put("targetId", Integer.toString(commentId));
+        allParams.put("targetId", commentId);
         allParams.put("type", "comment");
         List<Like> likes = repository.getLikes(allParams).get();
         if (likes.size() > 0) {
@@ -45,18 +46,19 @@ public class LikeServiceImpl extends AbstractService<LikeRepository>
             like.setDeleted(1);
             repository.updateLike(like);
         } else {
-            Like like = new Like(0, ownerId, commentId, "comment", DateFormat.getCurrentTime(), 0);
+            Like like = new Like(UUID.randomUUID().toString(), ownerId, commentId, "comment",
+                    DateFormat.getCurrentTime(), 0);
             repository.updateLike(like);
         }
     }
 
     @Override
-    public void savePostLike(String ownerId, int postId) {
+    public void savePostLike(String ownerId, String postId) {
         checkOwnerId(ownerId);
         checkPostId(postId);
         Map<String, String> allParams = new HashMap<>();
         allParams.put("ownerId", ownerId);
-        allParams.put("targetId", Integer.toString(postId));
+        allParams.put("targetId", postId);
         allParams.put("type", "post");
         List<Like> likes = repository.getLikes(allParams).get();
         if (likes.size() > 0) {
@@ -64,14 +66,14 @@ public class LikeServiceImpl extends AbstractService<LikeRepository>
             like.setDeleted(1);
             repository.updateLike(like);
         } else {
-            Like like = new Like(0, ownerId, postId, "post", DateFormat.getCurrentTime(), 0);
+            Like like = new Like(UUID.randomUUID().toString(), ownerId, postId, "post", DateFormat.getCurrentTime(), 0);
             repository.updateLike(like);
         }
     }
 
-    void checkPostId(int postId) {
+    void checkPostId(String postId) {
         Map<String, String> postIds = new HashMap<>();
-        postIds.put("id", Integer.toString(postId));
+        postIds.put("id", postId);
         List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "").get();
         if (posts.size() == 0) {
             throw new ResourceNotFoundException("Not found post with id: " +
@@ -79,9 +81,9 @@ public class LikeServiceImpl extends AbstractService<LikeRepository>
         }
     }
 
-    void checkCommentId(int commentId) {
+    void checkCommentId(String commentId) {
         Map<String, String> allParams = new HashMap<>();
-        allParams.put("id", Integer.toString(commentId));
+        allParams.put("id", commentId);
         List<Comment> comments = commentRepository.getAllComment(allParams, "", 0, 0, "")
                 .get();
         if (comments.size() == 0) {

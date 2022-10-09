@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Post {
-    private int id;
+    private String id;
     private String authorId;
     private String title;
     private String content;
     private int view;
-    private int categoryId;
+    private String categoryId;
     private Date created;
     private Date modified;
     private int enabled;

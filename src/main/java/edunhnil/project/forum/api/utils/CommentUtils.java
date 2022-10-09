@@ -25,11 +25,11 @@ public class CommentUtils {
     public CommentResponse generateCommentResponse(Comment c, String type, String loginId) {
         UserResponse ownerInformation = userService.getPublicUserById(c.getOwnerId()).get();
         Map<String, String> allParams = new HashMap<>();
-        allParams.put("targetId", Integer.toString(c.getId()));
+        allParams.put("targetId", c.getId());
         allParams.put("type", "comment");
 
         Map<String, String> paramsLiked = new HashMap<>();
-        paramsLiked.put("targetId", Integer.toString(c.getId()));
+        paramsLiked.put("targetId", c.getId());
         paramsLiked.put("type", "comment");
         paramsLiked.put("ownerId", loginId);
         paramsLiked.put("deleted", "0");
