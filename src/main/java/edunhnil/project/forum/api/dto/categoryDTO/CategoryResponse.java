@@ -9,19 +9,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryResponse {
-    private int id;
+    private String id;
     private String categoryName;
-    private String path;
     private int postsNumber;
     private PostResponse newestPost;
 
-    public CategoryResponse(int id,
+    public CategoryResponse(String id,
             String categoryName,
-            String path,
             int postsNumber) {
         this.categoryName = categoryName;
         this.id = id;
-        this.path = path;
         this.postsNumber = postsNumber;
     }
 }

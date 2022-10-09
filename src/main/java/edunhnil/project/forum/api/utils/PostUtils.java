@@ -39,11 +39,11 @@ public class PostUtils {
                 CategoryResponse category = categorySerRes.get();
 
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("targetId", Integer.toString(p.getId()));
+                allParams.put("targetId", p.getId());
                 allParams.put("type", "post");
 
                 Map<String, String> paramsLiked = new HashMap<>();
-                paramsLiked.put("targetId", Integer.toString(p.getId()));
+                paramsLiked.put("targetId", p.getId());
                 paramsLiked.put("type", "post");
                 paramsLiked.put("ownerId", loginId);
                 paramsLiked.put("deleted", "0");

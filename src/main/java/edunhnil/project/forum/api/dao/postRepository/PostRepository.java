@@ -10,5 +10,4 @@ public interface PostRepository {
 
         void savePost(Post post);
 
-        int getTotalPage(Map<String, String> allParams);
 }

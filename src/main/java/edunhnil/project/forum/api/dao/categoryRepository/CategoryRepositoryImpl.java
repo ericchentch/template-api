@@ -19,4 +19,18 @@ public class CategoryRepositoryImpl extends AbstractRepository implements Catego
         return replaceQuery(sql.toString(), Category.class);
     }
 
+    @Override
+    public void saveCategory(Category category) {
+        String[] ignores = { "" };
+        save(category, ignores);
+    }
+
+    @Override
+    public void deleteCategory(String id) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("DELETE FROM category WHERE id=");
+        sql.append("'").append(id).append("'");
+        jdbcTemplate.execute(sql.toString());
+    }
+
 }

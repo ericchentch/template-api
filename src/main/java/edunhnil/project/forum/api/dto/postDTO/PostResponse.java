@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponse {
-    private int id;
+    private String id;
     private String authorId;
     private UserResponse author;
     private String title;
     private String content;
     private int view;
     private int like;
-    private int categoryId;
+    private String categoryId;
     private CategoryResponse category;
     private String created;
     private String modified;

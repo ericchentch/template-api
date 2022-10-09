@@ -34,7 +34,7 @@ public class CommentController extends AbstractController<CommentService> {
 
         @GetMapping(value = "/public/get-comment-in-post")
         public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPost(
-                        @RequestParam(required = true, defaultValue = "1") int postId,
+                        @RequestParam(required = true, defaultValue = "1") String postId,
                         @RequestParam(required = false, defaultValue = "1") int page,
                         @RequestParam(defaultValue = "modified") String sortField,
                         @RequestParam(defaultValue = "asc") String keySort) {
@@ -45,7 +45,7 @@ public class CommentController extends AbstractController<CommentService> {
         @SecurityRequirement(name = "Bearer Authentication")
         @GetMapping(value = "/user/get-comment-in-post")
         public ResponseEntity<CommonResponse<ListWrapperResponse<CommentResponse>>> getCommentInPostUser(
-                        @RequestParam(required = true, defaultValue = "1") int postId,
+                        @RequestParam(required = true, defaultValue = "1") String postId,
                         @RequestParam(required = false, defaultValue = "1") int page,
                         @RequestParam(defaultValue = "modified") String sortField,
                         @RequestParam(defaultValue = "asc") String keySort, HttpServletRequest request) {
@@ -77,7 +77,7 @@ public class CommentController extends AbstractController<CommentService> {
         @PostMapping(value = "user/add-new-comment")
         public ResponseEntity<CommonResponse<String>> addNewComment(@RequestBody CommentRequest commentRequest,
                         HttpServletRequest request,
-                        @RequestParam(required = true) int postId) {
+                        @RequestParam(required = true) String postId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
                 service.addNewComment(commentRequest, postId, id);
@@ -92,7 +92,7 @@ public class CommentController extends AbstractController<CommentService> {
         @PutMapping(value = "user/edit-comment")
         public ResponseEntity<CommonResponse<String>> editComment(@RequestBody CommentRequest commentRequest,
                         HttpServletRequest request,
-                        @RequestParam(required = true) int commentId) {
+                        @RequestParam(required = true) String commentId) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
                 service.editCommentById(commentRequest, commentId, id);
@@ -105,7 +105,7 @@ public class CommentController extends AbstractController<CommentService> {
 
         @SecurityRequirement(name = "Bearer Authentication")
         @DeleteMapping(value = "user/delete-comment")
-        public ResponseEntity<CommonResponse<String>> userDeleteComment(@RequestParam(required = true) int commentId,
+        public ResponseEntity<CommonResponse<String>> userDeleteComment(@RequestParam(required = true) String commentId,
                         HttpServletRequest request) {
                 validateToken(request);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
@@ -119,7 +119,8 @@ public class CommentController extends AbstractController<CommentService> {
 
         @SecurityRequirement(name = "Bearer Authentication")
         @DeleteMapping(value = "admin/delete-comment")
-        public ResponseEntity<CommonResponse<String>> adminDeleteComment(@RequestParam(required = true) int commentId,
+        public ResponseEntity<CommonResponse<String>> adminDeleteComment(
+                        @RequestParam(required = true) String commentId,
                         HttpServletRequest request) {
                 validateToken(request);
                 service.deleteAdminComment(commentId);

@@ -23,13 +23,8 @@ public class CommentRepositoryImpl extends AbstractRepository implements Comment
 
     @Override
     public void saveComment(Comment comment) {
-        String[] ignores = { "id", "modified" };
+        String[] ignores = { "modified" };
         save(comment, ignores);
-    }
-
-    @Override
-    public int getTotalCommentPost(Map<String, String> allParams) {
-        return getTotal(allParams, Comment.class);
     }
 
 }

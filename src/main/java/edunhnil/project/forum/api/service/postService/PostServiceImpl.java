@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                                 .map(p -> postUtils.generatePostResponse(p, "public", "a"))
                                                 .collect(Collectors.toList()),
                                 page, pageSize,
-                                repository.getTotalPage(allParams)));
+                                posts.size()));
         }
 
         @Override
@@ -77,13 +78,13 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                                 .map(p -> postUtils.generatePostResponse(p, publicCondition,
                                                                 loginId))
                                                 .collect(Collectors.toList()),
-                                page, pageSize, repository.getTotalPage(allParams)));
+                                page, pageSize, posts.size()));
         }
 
         @Override
-        public Optional<PostResponse> getPrivatePost(int id, String loginId) {
+        public Optional<PostResponse> getPrivatePost(String id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 changePublic(postIds, loginId, "id");
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
@@ -95,9 +96,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public Optional<PostResponse> getPostById(int id) {
+        public Optional<PostResponse> getPostById(String id) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
@@ -110,9 +111,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void updatePostById(PostRequest req, int id, String loginId) {
+        public void updatePostById(PostRequest req, String id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
@@ -125,7 +126,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 }
                 validate(req);
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", Integer.toString(id));
+                allParams.put("id", id);
                 List<Category> categories = categoryRepository.getCategories(allParams).get();
                 if (categories.size() == 0) {
                         throw new ResourceNotFoundException(
@@ -143,13 +144,14 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         public void addNewPost(PostRequest postRequest, String authorId) {
                 validate(postRequest);
                 Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", Integer.toString(postRequest.getCategoryId()));
+                allParams.put("id", postRequest.getCategoryId());
                 List<Category> categories = categoryRepository.getCategories(allParams).get();
                 if (categories.size() == 0) {
                         throw new ResourceNotFoundException(
                                         "Not found category with id:" + postRequest.getCategoryId());
                 }
                 Post post = objectMapper.convertValue(postRequest, Post.class);
+                post.setId(UUID.randomUUID().toString());
                 post.setAuthorId(authorId);
                 post.setCreated(DateFormat.getCurrentTime());
                 post.setDeleted(0);
@@ -158,9 +160,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void deleteAdminPostById(int id) {
+        public void deleteAdminPostById(String id) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
@@ -174,9 +176,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void changeAdminEnabled(int input, int id) {
+        public void changeAdminEnabled(int input, String id) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
@@ -190,9 +192,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void deleteUserPostById(int id, String loginId) {
+        public void deleteUserPostById(String id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
@@ -210,9 +212,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void changeUserEnabled(int input, int id, String loginId) {
+        public void changeUserEnabled(int input, String id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", Integer.toString(id));
+                postIds.put("id", id);
                 List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {

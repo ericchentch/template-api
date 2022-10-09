@@ -18,7 +18,7 @@ public class LikeRepositoryImpl extends AbstractRepository implements LikeReposi
 
     @Override
     public void updateLike(Like like) {
-        String[] ignores = { "id" };
+        String[] ignores = { "" };
         save(like, ignores);
     }
 
