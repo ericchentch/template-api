@@ -40,7 +40,7 @@ public class CategoryController extends AbstractController<CategoryService> {
     @PostMapping(value = "/add-category")
     public ResponseEntity<CommonResponse<String>> addCategory(HttpServletRequest request,
             @RequestBody CategoryRequest categoryRequest) {
-        validateToken(request);
+        validateToken(request, false);
         service.saveCategory(categoryRequest);
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(true, "", "Add new category successfully!", HttpStatus.OK.value()),
@@ -51,7 +51,7 @@ public class CategoryController extends AbstractController<CategoryService> {
     @PutMapping(value = "/update-category")
     public ResponseEntity<CommonResponse<String>> updateCategory(HttpServletRequest request,
             @RequestBody CategoryRequest categoryRequest, @RequestParam(required = true) String id) {
-        validateToken(request);
+        validateToken(request, false);
         service.updateCategory(categoryRequest, id);
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(true, "", "Update category successfully!", HttpStatus.OK.value()),
@@ -62,7 +62,7 @@ public class CategoryController extends AbstractController<CategoryService> {
     @DeleteMapping(value = "/delete-category")
     public ResponseEntity<CommonResponse<String>> deleteCategory(HttpServletRequest request,
             @RequestParam(required = true) String id) {
-        validateToken(request);
+        validateToken(request, false);
         service.deleteCategory(id);
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(true, "", "Delete category successfully!", HttpStatus.OK.value()),

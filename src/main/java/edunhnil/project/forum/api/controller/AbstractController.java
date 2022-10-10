@@ -16,6 +16,7 @@ import edunhnil.project.forum.api.dao.permissionRepository.Permission;
 import edunhnil.project.forum.api.dao.permissionRepository.PermissionRepository;
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
+import edunhnil.project.forum.api.dto.commonDTO.ValidationResponse;
 import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.exception.UnauthorizedException;
@@ -38,7 +39,7 @@ public abstract class AbstractController<s> {
     @Value("${spring.key.jwt}")
     protected String JWT_SECRET;
 
-    protected void validateToken(HttpServletRequest request) {
+    protected ValidationResponse validateToken(HttpServletRequest request, boolean hasPublic) {
         if (tokenProvider.validateToken(request)) {
             String token = JwtUtils.getJwtFromRequest(request);
             User user = tokenProvider.getUserInfoFromToken(token)
@@ -54,8 +55,17 @@ public abstract class AbstractController<s> {
             if (permissions.size() == 0) {
                 throw new ForbiddenException("Access denied!");
             }
+            boolean skipAccessability = false;
+            for (Permission permission : permissions) {
+                if (permission.getSkipAccessability() == 0 && permission.getFeatureId().contains(feature.get_id())) {
+                    skipAccessability = true;
+                }
+            }
+            return new ValidationResponse(skipAccessability, user.get_id().toString());
         } else {
-            throw new UnauthorizedException("Unauthorized");
+            if (!hasPublic)
+                throw new UnauthorizedException("Unauthorized");
+            return new ValidationResponse(false, "public");
         }
     }
 

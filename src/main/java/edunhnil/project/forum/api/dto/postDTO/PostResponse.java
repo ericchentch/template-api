@@ -22,6 +22,5 @@ public class PostResponse {
     private String created;
     private String modified;
     private boolean isLiked;
-    private int enabled;
     private int deleted;
 }

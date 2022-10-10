@@ -8,17 +8,15 @@ import edunhnil.project.forum.api.dto.commentDTO.CommentResponse;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 
 public interface CommentService {
-        Optional<ListWrapperResponse<CommentResponse>> getPublicComment(String postId, int page, String keySort,
-                        String sortField, String loginId);
 
-        Optional<ListWrapperResponse<CommentResponse>> getAdminComment(Map<String, String> allParams,
-                        String keySort, int page, int pageSize, String sortField, String loginId);
+        Optional<ListWrapperResponse<CommentResponse>> getComments(Map<String, String> allParams,
+                        String keySort, int page, int pageSize, String sortField, String loginId,
+                        boolean skipAccessability);
 
         void addNewComment(CommentRequest commentRequest, String postId, String ownerId);
 
-        void editCommentById(CommentRequest commentRequest, String id, String loginId);
+        void editCommentById(CommentRequest commentRequest, String id, String loginId, boolean skipAccessability);
 
-        void deleteUserComment(String id, String loginId);
+        void deleteComment(String id, String loginId, boolean skipAccessability);
 
-        void deleteAdminComment(String id);
 }

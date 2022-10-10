@@ -46,7 +46,10 @@ public class PostUtils {
                 paramsLiked.put("targetId", p.getId());
                 paramsLiked.put("type", "post");
                 paramsLiked.put("ownerId", loginId);
-                paramsLiked.put("deleted", "0");
+
+                if (type.compareTo("public") == 0) {
+                        paramsLiked.put("deleted", "0");
+                }
 
                 if (type.compareTo("public") == 0) {
                         return new PostResponse(p.getId(), p.getAuthorId(),
@@ -61,8 +64,7 @@ public class PostUtils {
                                                         DateTime.YYYY_MM_DD),
                                         DateFormat.toDateString(p.getModified(),
                                                         DateTime.YYYY_MM_DD),
-                                        likeRepository.getTotalLike(paramsLiked) != 0,
-                                        0,
+                                        false,
                                         0);
                 } else {
                         return new PostResponse(p.getId(), p.getAuthorId(),
@@ -78,7 +80,6 @@ public class PostUtils {
                                         DateFormat.toDateString(p.getModified(),
                                                         DateTime.YYYY_MM_DD),
                                         likeRepository.getTotalLike(paramsLiked) != 0,
-                                        p.getEnabled(),
                                         p.getDeleted());
                 }
         }

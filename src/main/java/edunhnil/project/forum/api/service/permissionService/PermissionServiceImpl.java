@@ -47,7 +47,8 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
                                 generateUserList(permission.getUserId().stream().map(userId -> userId.toString())
                                         .collect(Collectors.toList())),
                                 DateFormat.toDateString(permission.getCreated(), DateTime.YYYY_MM_DD),
-                                DateFormat.toDateString(permission.getModified(), DateTime.YYYY_MM_DD)))
+                                DateFormat.toDateString(permission.getModified(), DateTime.YYYY_MM_DD),
+                                permission.getSkipAccessability()))
                         .collect(Collectors.toList()),
                 page, pageSize, permissions.size()));
     }
@@ -64,6 +65,7 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
         Permission permission = new Permission();
         permission.setName(permissionRequest.getName());
         permission.setCreated(DateFormat.getCurrentTime());
+        permission.setSkipAccessability(1);
         if (permissionRequest.getFeatureId().size() != 0) {
             List<FeatureResponse> featureResponse = generateFeatureList(permissionRequest.getFeatureId());
             permission.setFeatureId(
@@ -105,6 +107,7 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
         } else {
             permission.setUserId(new ArrayList<>());
         }
+        permission.setSkipAccessability(permissionRequest.getSkipAccessability());
         permission.setModified(DateFormat.getCurrentTime());
         repository.insertAndUpdate(permission);
     }
@@ -138,7 +141,7 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
         String result = generateParamsValue(users);
         Map<String, String> userParams = new HashMap<>();
         userParams.put("_id", result.toString());
-        return userService.getPublicUsers(userParams, "", 0, 0, "").get().getData();
+        return userService.getUsers(userParams, "", 0, 0, "", "public", false).get().getData();
     }
 
 }

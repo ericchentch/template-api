@@ -34,7 +34,7 @@ public class PermissionController extends AbstractController<PermissionService> 
                         @RequestParam Map<String, String> allParams,
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 return response(service.getPermissions(allParams, keySort, page, pageSize, sortField),
                                 "Get list of permissions successfully!");
         }
@@ -43,7 +43,7 @@ public class PermissionController extends AbstractController<PermissionService> 
         @PostMapping(value = "add-new-permission")
         public ResponseEntity<CommonResponse<String>> addNewFeature(
                         @RequestBody PermissionRequest permissionRequest, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.addNewPermissions(permissionRequest);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add permission successfully!",
@@ -57,7 +57,7 @@ public class PermissionController extends AbstractController<PermissionService> 
         public ResponseEntity<CommonResponse<String>> updateFeature(
                         @RequestBody PermissionRequest permissionRequest, @RequestParam(required = true) String id,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.editPermission(permissionRequest, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update permission successfully!",
@@ -70,7 +70,7 @@ public class PermissionController extends AbstractController<PermissionService> 
         @DeleteMapping(value = "delete-permission")
         public ResponseEntity<CommonResponse<String>> updateFeature(
                         @RequestParam(required = true) String id, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.deletePermission(id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete permission successfully!",

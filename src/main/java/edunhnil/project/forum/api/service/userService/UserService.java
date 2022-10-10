@@ -5,33 +5,22 @@ import java.util.Optional;
 
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 import edunhnil.project.forum.api.dto.userDTO.ChangePasswordReq;
-import edunhnil.project.forum.api.dto.userDTO.ChangeUsernameReq;
 import edunhnil.project.forum.api.dto.userDTO.UserRequest;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
 
 public interface UserService {
         Optional<ListWrapperResponse<UserResponse>> getUsers(Map<String, String> allParams, String keySort, int page,
                         int pageSize,
-                        String sortField);
+                        String sortField, String loginId, boolean skipAccessability);
 
-        Optional<ListWrapperResponse<UserResponse>> getPublicUsers(Map<String, String> allParams, String keySort,
-                        int page, int pageSize,
-                        String sortField);
-
-        Optional<UserResponse> getUserById(String id);
-
-        Optional<UserResponse> getPublicUserById(String id);
+        Optional<UserResponse> getUserById(String id, String loginId, boolean skipAccessability);
 
         void addNewUser(UserRequest userRequest);
 
-        void updateUserById(UserRequest userRequest, String id);
+        void updateUserById(UserRequest userRequest, String loginId, String id, boolean skipAccessability);
 
-        void deleteUserById(String id);
+        void deleteUserById(String id, String loginId, boolean skipAccessability);
 
         void changePasswordById(ChangePasswordReq changePassword, String id);
-
-        void changeUsernameById(ChangeUsernameReq changeUsername, String id);
-
-        void change2FAStatus(String id);
 
 }

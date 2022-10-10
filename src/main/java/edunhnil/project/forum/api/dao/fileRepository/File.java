@@ -19,5 +19,5 @@ public class File {
     private String typeFile;
     private String linkFile;
     private Date createdAt;
-    private String deleted;
+    private int deleted;
 }

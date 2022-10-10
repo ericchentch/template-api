@@ -17,11 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
+import edunhnil.project.forum.api.dto.commonDTO.ValidationResponse;
 import edunhnil.project.forum.api.dto.userDTO.ChangePasswordReq;
-import edunhnil.project.forum.api.dto.userDTO.ChangeUsernameReq;
 import edunhnil.project.forum.api.dto.userDTO.UserRequest;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
-import edunhnil.project.forum.api.jwt.JwtUtils;
 import edunhnil.project.forum.api.service.userService.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -34,52 +33,33 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class UserController extends AbstractController<UserService> {
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "admin/get-list-user")
+        @GetMapping(value = "get-list-user")
         public ResponseEntity<CommonResponse<ListWrapperResponse<UserResponse>>> getUsers(
                         @RequestParam(required = false, defaultValue = "1") int page,
                         @RequestParam(required = false, defaultValue = "10") int pageSize,
                         @RequestParam Map<String, String> allParams,
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
-                validateToken(request);
-                return response(service.getUsers(allParams, keySort, page, pageSize, sortField),
-                                "Get list of users successfully!");
-        }
-
-        @GetMapping(value = "public/get-list-user")
-        public ResponseEntity<CommonResponse<ListWrapperResponse<UserResponse>>> getPublicUsers(
-                        @RequestParam(required = false, defaultValue = "1") int page,
-                        @RequestParam(required = false, defaultValue = "10") int pageSize,
-                        @RequestParam Map<String, String> allParams,
-                        @RequestParam(defaultValue = "asc") String keySort,
-                        @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
-                allParams.put("deleted", "0");
-                return response(service.getPublicUsers(allParams, keySort, page, pageSize, sortField),
+                ValidationResponse result = validateToken(request, true);
+                return response(service.getUsers(allParams, keySort, page, pageSize, sortField, result.getLoginId(),
+                                result.isSkipAccessability()),
                                 "Get list of users successfully!");
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "admin/get-detail-user")
+        @GetMapping(value = "get-detail-user")
         public ResponseEntity<CommonResponse<UserResponse>> getUserById(HttpServletRequest request,
                         @RequestParam(required = true) String id) {
-                validateToken(request);
-                return response(service.getUserById(id), "Get user successfully!");
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @GetMapping(value = "user/get-profile")
-        public ResponseEntity<CommonResponse<UserResponse>> getProfile(HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
-                return response(service.getUserById(id), "Get user successfully!");
+                ValidationResponse result = validateToken(request, true);
+                return response(service.getUserById(id, result.getLoginId(), result.isSkipAccessability()),
+                                "Get user successfully!");
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
         @PostMapping(value = "admin/add-new-user")
         public ResponseEntity<CommonResponse<String>> addNewUser(@RequestBody UserRequest userRequest,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.addNewUser(userRequest);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add user successfully!",
@@ -89,12 +69,12 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "admin/update-user")
-        public ResponseEntity<CommonResponse<String>> updateUserAdmin(@RequestBody UserRequest userRequest,
+        @PutMapping(value = "update-user")
+        public ResponseEntity<CommonResponse<String>> updateUser(@RequestBody UserRequest userRequest,
                         @RequestParam(required = true) String userId,
                         HttpServletRequest request) {
-                validateToken(request);
-                service.updateUserById(userRequest, userId);
+                ValidationResponse result = validateToken(request, false);
+                service.updateUserById(userRequest, result.getLoginId(), userId, result.isSkipAccessability());
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update user successfully!",
                                                 HttpStatus.OK.value()),
@@ -103,40 +83,11 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "admin/delete-user")
-        public ResponseEntity<CommonResponse<String>> deleteUserUser(HttpServletRequest request,
-                        @RequestParam(required = true) String userId) {
-                validateToken(request);
-                service.deleteUserById(userId);
-                return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Delete user successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/update-user")
-        public ResponseEntity<CommonResponse<String>> updateUserUser(HttpServletRequest request,
-                        @RequestBody UserRequest userRequest) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
-                service.updateUserById(userRequest, id);
-                return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Update successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @DeleteMapping(value = "user/delete-user")
-        public ResponseEntity<CommonResponse<String>> deleteUserAdmin(HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
-                service.deleteUserById(id);
+        @DeleteMapping(value = "delete-user")
+        public ResponseEntity<CommonResponse<String>> deleteUser(@RequestParam(required = true) String userId,
+                        HttpServletRequest request) {
+                ValidationResponse result = validateToken(request, false);
+                service.deleteUserById(userId, result.getLoginId(), result.isSkipAccessability());
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete successfully!",
                                                 HttpStatus.OK.value()),
@@ -145,44 +96,13 @@ public class UserController extends AbstractController<UserService> {
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/change-password")
+        @PutMapping(value = "change-password")
         public ResponseEntity<CommonResponse<String>> changePassword(@RequestBody ChangePasswordReq changePassword,
                         HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false).getLoginId();
                 service.changePasswordById(changePassword, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Change password successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/change-username")
-        public ResponseEntity<CommonResponse<String>> changeUsername(@RequestBody ChangeUsernameReq changeUsername,
-                        HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
-                service.changeUsernameById(changeUsername, id);
-                return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Change username successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/change-2fa-status")
-        public ResponseEntity<CommonResponse<String>> change2FAStatus(HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
-                service.change2FAStatus(id);
-                return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Change 2FA status successfully!",
                                                 HttpStatus.OK.value()),
                                 null,
                                 HttpStatus.OK.value());

@@ -18,4 +18,5 @@ public class PermissionResponse {
     private List<UserResponse> users;
     private String created;
     private String modified;
+    private int skipAccessability;
 }

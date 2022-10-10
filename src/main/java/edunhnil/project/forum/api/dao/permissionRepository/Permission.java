@@ -21,4 +21,5 @@ public class Permission {
     private List<ObjectId> userId;
     private Date created;
     private Date modified;
+    private int skipAccessability;
 }
