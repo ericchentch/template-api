@@ -12,6 +12,8 @@ public interface PermissionRepository {
 
     Optional<List<Permission>> getPermissionByUser(String userId, String featureId);
 
+    Optional<List<Permission>> getPermissionByUserId(String userId);
+
     void insertAndUpdate(Permission permission);
 
     void deletePermission(String id);

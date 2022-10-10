@@ -13,4 +13,6 @@ public interface FeatureRepository {
     Optional<Feature> getFeatureByPath(String path);
 
     void insertAndUpdate(Feature feature);
+
+    void deleteFeature(String id);
 }

@@ -25,7 +25,7 @@ public class LikeController extends AbstractController<LikeService> {
         @PostMapping(value = "user/update-like-post")
         public ResponseEntity<CommonResponse<String>> likePost(HttpServletRequest request,
                         @RequestParam(required = true) String postId) {
-                String id = validateToken(request, false);
+                String id = validateToken(request, false).getLoginId();
                 service.savePostLike(id, postId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update like successfully!",
@@ -38,7 +38,7 @@ public class LikeController extends AbstractController<LikeService> {
         @PostMapping(value = "user/update-like-comment")
         public ResponseEntity<CommonResponse<String>> likeComment(HttpServletRequest request,
                         @RequestParam(required = true) String commentId) {
-                String id = validateToken(request, false);
+                String id = validateToken(request, false).getLoginId();
                 service.saveCommentLike(id, commentId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update like successfully!",

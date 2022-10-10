@@ -10,6 +10,8 @@ import org.springframework.util.ObjectUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edunhnil.project.forum.api.dao.accessabilityRepository.AccessabilityRepository;
+import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.InvalidRequestException;
 import edunhnil.project.forum.api.log.AppLogger;
 import edunhnil.project.forum.api.log.LoggerFactory;
@@ -26,15 +28,18 @@ public abstract class AbstractService<r> {
     @Autowired
     protected ObjectValidator objectValidator;
 
+    @Autowired
+    protected AccessabilityRepository accessabilityRepository;
+
     protected ObjectMapper objectMapper;
 
-    protected AppLogger APP_LOGGER = LoggerFactory.getLogger(LoggerType.APPLICATION);
+    protected AppLogger APP_LOGGER = LoggerFactory.getLogger(LoggerType.APPLICATION);;
 
     @PostConstruct
     public void init() {
         objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    };
+    }
 
     protected BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -45,5 +50,21 @@ public abstract class AbstractService<r> {
         if (!ObjectUtils.isEmpty(message)) {
             throw new InvalidRequestException(message);
         }
+    }
+
+    protected void checkAccessability(String loginId, String targetId, boolean skipAccessability) {
+        if (!skipAccessability) {
+            accessabilityRepository.getAccessability(loginId, targetId)
+                    .orElseThrow(() -> new ForbiddenException("Access denied!"));
+        }
+    }
+
+    protected String isPublic(String ownerId, String loginId, boolean skipAccessability) {
+        if (skipAccessability)
+            return "";
+        if (ownerId.compareTo(loginId) == 0) {
+            return "";
+        } else
+            return "public";
     }
 }

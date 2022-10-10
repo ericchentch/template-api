@@ -41,4 +41,12 @@ public class FeatureRepositoryImpl extends AbstractMongoRepository implements Fe
         return replaceFindOne(query, Feature.class);
     }
 
+    @Override
+    public void deleteFeature(String id) {
+        Map<String, String> params = new HashMap<>();
+        params.put("_id", id);
+        Query query = generateQueryMongoDB(params, Feature.class, "", "", 0, 0);
+        authenticationTemplate.remove(query, Feature.class);
+    }
+
 }

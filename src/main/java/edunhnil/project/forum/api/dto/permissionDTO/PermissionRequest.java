@@ -2,6 +2,8 @@ package edunhnil.project.forum.api.dto.permissionDTO;
 
 import java.util.List;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -19,13 +21,16 @@ public class PermissionRequest {
     @NotEmpty(message = "Name is required!")
     private String name;
 
-    @NotBlank(message = "Feature id is required!")
     @NotNull(message = "Feature id is required!")
     @NotEmpty(message = "Feature id is required!")
     private List<String> featureId;
 
-    @NotBlank(message = "User id is required!")
     @NotNull(message = "User id is required!")
     @NotEmpty(message = "User id is required!")
     private List<String> userId;
+
+    @NotNull(message = "Skip accessability id is required!")
+    @Min(value = 0, message = "Min value is 0 (true)")
+    @Max(value = 1, message = "Max value is 1 (false)")
+    private int skipAccessability;
 }

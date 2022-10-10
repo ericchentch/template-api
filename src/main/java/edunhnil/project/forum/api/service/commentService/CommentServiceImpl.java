@@ -7,9 +7,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edunhnil.project.forum.api.dao.accessabilityRepository.Accessability;
+import edunhnil.project.forum.api.dao.accessabilityRepository.AccessabilityRepository;
 import edunhnil.project.forum.api.dao.commentRepository.Comment;
 import edunhnil.project.forum.api.dao.commentRepository.CommentRepository;
 import edunhnil.project.forum.api.dao.postRepository.Post;
@@ -17,7 +20,6 @@ import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dto.commentDTO.CommentRequest;
 import edunhnil.project.forum.api.dto.commentDTO.CommentResponse;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
-import edunhnil.project.forum.api.exception.ForbiddenException;
 import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.AbstractService;
 import edunhnil.project.forum.api.utils.CommentUtils;
@@ -33,33 +35,22 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         @Autowired
         private CommentUtils commentUtils;
 
-        @Override
-        public Optional<ListWrapperResponse<CommentResponse>> getPublicComment(String postId, int page,
-                        String keySort, String sortField, String loginId) {
-                Map<String, String> allParams = new HashMap<String, String>();
-                allParams.put("postId", postId);
-                List<Comment> comments = repository
-                                .getAllComment(allParams, keySort, page, 5, sortField)
-                                .get();
-                return Optional.of(new ListWrapperResponse<CommentResponse>(comments.stream()
-                                .map(c -> commentUtils.generateCommentResponse(c, "public", loginId))
-                                .collect(Collectors.toList()), page, 5,
-                                comments.size()));
-        }
+        @Autowired
+        private AccessabilityRepository accessabilityRepository;
 
         @Override
-        public Optional<ListWrapperResponse<CommentResponse>> getAdminComment(Map<String, String> allParams,
+        public Optional<ListWrapperResponse<CommentResponse>> getComments(Map<String, String> allParams,
                         String keySort, int page,
                         int pageSize,
-                        String sortField, String loginId) {
-                List<Comment> comments = repository
-                                .getAllComment(allParams, keySort, page, pageSize, sortField)
-                                .orElseThrow(() -> new ResourceNotFoundException("No comment"));
+                        String sortField, String loginId, boolean skipAccessability) {
+                List<Comment> comments = repository.getAllComment(allParams, keySort, page, pageSize, sortField).get();
                 return Optional
                                 .of(new ListWrapperResponse<CommentResponse>(
                                                 comments.stream()
                                                                 .map(c -> commentUtils.generateCommentResponse(c,
-                                                                                "", loginId))
+                                                                                isPublic(c.getOwnerId(), loginId,
+                                                                                                skipAccessability),
+                                                                                loginId))
                                                                 .collect(Collectors.toList()),
                                                 page, pageSize, comments.size()));
         }
@@ -80,11 +71,14 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 comment.setOwnerId(ownerId);
                 comment.setCreated(DateFormat.getCurrentTime());
                 comment.setDeleted(0);
+                accessabilityRepository
+                                .addNewAccessability(new Accessability(null, new ObjectId(ownerId), comment.getId()));
                 repository.saveComment(comment);
         }
 
         @Override
-        public void editCommentById(CommentRequest commentRequest, String id, String loginId) {
+        public void editCommentById(CommentRequest commentRequest, String id, String loginId,
+                        boolean skipAccessability) {
                 validate(commentRequest);
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", id);
@@ -93,17 +87,15 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 if (comments.size() == 0) {
                         throw new ResourceNotFoundException("Not found comment with id:" + id);
                 }
+                checkAccessability(loginId, id, skipAccessability);
                 Comment comment = objectMapper.convertValue(comments.get(0), Comment.class);
-                if (comment.getOwnerId().compareTo(loginId) != 0) {
-                        throw new ForbiddenException("Access denied!");
-                }
                 comment.setContent(commentRequest.getContent());
                 comment.setModified(DateFormat.getCurrentTime());
                 repository.saveComment(comment);
         }
 
         @Override
-        public void deleteUserComment(String id, String loginId) {
+        public void deleteComment(String id, String loginId, boolean skipAccessability) {
                 Map<String, String> allParams = new HashMap<>();
                 allParams.put("id", id);
                 List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
@@ -111,24 +103,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                 if (comments.size() == 0) {
                         throw new ResourceNotFoundException("Not found comment with id:" + id);
                 }
-                Comment comment = comments.get(0);
-                if (comment.getOwnerId().compareTo(loginId) != 0) {
-                        throw new ForbiddenException("Access denied!");
-                }
-                comment.setDeleted(0);
-                comment.setModified(DateFormat.getCurrentTime());
-                repository.saveComment(comment);
-        }
-
-        @Override
-        public void deleteAdminComment(String id) {
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
-                                .get();
-                if (comments.size() == 0) {
-                        throw new ResourceNotFoundException("Not found comment with id:" + id);
-                }
+                checkAccessability(loginId, id, skipAccessability);
                 Comment comment = comments.get(0);
                 comment.setDeleted(0);
                 comment.setModified(DateFormat.getCurrentTime());

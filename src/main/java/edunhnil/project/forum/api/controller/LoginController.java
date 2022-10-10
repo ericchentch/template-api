@@ -34,7 +34,7 @@ public class LoginController extends AbstractController<LoginService> {
         @SecurityRequirement(name = "Bearer Authentication")
         @PostMapping(value = "logout")
         public ResponseEntity<CommonResponse<String>> logout(HttpServletRequest request) {
-                String id = validateToken(request, false);
+                String id = validateToken(request, false).getLoginId();
                 service.logout(id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Logout successfully!",

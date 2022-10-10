@@ -1,5 +1,6 @@
 package edunhnil.project.forum.api.service.userService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +14,6 @@ import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 import edunhnil.project.forum.api.dto.userDTO.ChangePasswordReq;
-import edunhnil.project.forum.api.dto.userDTO.ChangeUsernameReq;
 import edunhnil.project.forum.api.dto.userDTO.UserRequest;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
 import edunhnil.project.forum.api.exception.InvalidRequestException;
@@ -34,43 +34,30 @@ public class UserServiceImpl extends AbstractService<UserRepository>
         public Optional<ListWrapperResponse<UserResponse>> getUsers(Map<String, String> allParams,
                         String keySort, int page,
                         int pageSize,
-                        String sortField) {
+                        String sortField, String loginId, boolean skipAccessability) {
                 List<User> users = repository
                                 .getUsers(allParams, keySort, page, pageSize, sortField)
                                 .get();
                 return Optional.of(new ListWrapperResponse<UserResponse>(
                                 users.stream()
-                                                .map(user -> userUtils.generateUserResponse(user, ""))
+                                                .map(user -> userUtils.generateUserResponse(user,
+                                                                isPublic(user.get_id().toString(), loginId,
+                                                                                skipAccessability)))
                                                 .collect(Collectors.toList()),
                                 page, pageSize, 0));
         }
 
         @Override
-        public Optional<ListWrapperResponse<UserResponse>> getPublicUsers(Map<String, String> allParams, String keySort,
-                        int page,
-                        int pageSize, String sortField) {
-                List<User> users = repository
-                                .getUsers(allParams, keySort, page, pageSize, sortField)
-                                .get();
-                return Optional.of(new ListWrapperResponse<UserResponse>(
-                                users.stream()
-                                                .map(user -> userUtils.generateUserResponse(user, "public"))
-                                                .collect(Collectors.toList()),
-                                page, pageSize, repository.getTotalPage(allParams)));
-        }
-
-        @Override
-        public Optional<UserResponse> getUserById(String id) {
-                User user = repository.getUserById(id).orElseThrow(
-                                () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
-                return Optional.of(userUtils.generateUserResponse(user, ""));
-        }
-
-        @Override
-        public Optional<UserResponse> getPublicUserById(String id) {
-                User user = repository.getUserById(id).orElseThrow(
-                                () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
-                return Optional.of(userUtils.generateUserResponse(user, "public"));
+        public Optional<UserResponse> getUserById(String id, String loginId, boolean skipAccessability) {
+                Map<String, String> allParams = new HashMap<>();
+                allParams.put("_id", id);
+                List<User> users = repository.getUsers(allParams, "", 0, 0, "").get();
+                if (users.size() == 0) {
+                        throw new ResourceNotFoundException("Not found user!");
+                }
+                User user = users.get(0);
+                return Optional.of(userUtils.generateUserResponse(user,
+                                isPublic(user.get_id().toString(), loginId, skipAccessability)));
         }
 
         @Override
@@ -90,10 +77,11 @@ public class UserServiceImpl extends AbstractService<UserRepository>
         }
 
         @Override
-        public void updateUserById(UserRequest userRequest, String id) {
+        public void updateUserById(UserRequest userRequest, String loginId, String id, boolean skipAccessability) {
                 User oldUser = repository.getUserById(id).orElseThrow(
                                 () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
                 validate(userRequest);
+                checkAccessability(loginId, id, skipAccessability);
                 PasswordValidator.validateNewPassword(userRequest.getPassword());
                 User user = objectMapper.convertValue(userRequest, User.class);
                 user.setToken(oldUser.getToken());
@@ -103,9 +91,10 @@ public class UserServiceImpl extends AbstractService<UserRepository>
         }
 
         @Override
-        public void deleteUserById(String id) {
+        public void deleteUserById(String id, String loginId, boolean skipAccessability) {
                 User oldUser = repository.getUserById(id).orElseThrow(
                                 () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
+                checkAccessability(loginId, id, skipAccessability);
                 User user = objectMapper.convertValue(oldUser, User.class);
                 user.setDeleted(1);
                 user.setModified(DateFormat.getCurrentTime());
@@ -127,33 +116,6 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                 user.setPassword(bCryptPasswordEncoder.encode(changePassword.getNewPassword()));
                 user.setModified(DateFormat.getCurrentTime());
                 repository.insertAndUpdate(user);
-        }
-
-        @Override
-        public void changeUsernameById(ChangeUsernameReq changeUsername, String id) {
-                validate(changeUsername);
-                User user = repository.getUserById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found id: " + id));
-                if (user.getUsername().compareTo(changeUsername.getOldUsername()) != 0) {
-                        throw new InvalidRequestException("Old username is not match!");
-                }
-                user.setUsername(changeUsername.getNewUsername());
-                user.setModified(DateFormat.getCurrentTime());
-                repository.insertAndUpdate(user);
-        }
-
-        @Override
-        public void change2FAStatus(String id) {
-                User user = repository.getUserById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found id: " + id));
-                if (user.isVerify2FA()) {
-                        user.setVerify2FA(false);
-                        repository.insertAndUpdate(user);
-                } else {
-                        user.setVerify2FA(true);
-                        repository.insertAndUpdate(user);
-                }
-
         }
 
 }
