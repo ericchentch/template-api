@@ -62,7 +62,6 @@ public class PostUtils {
                                         DateFormat.toDateString(p.getModified(),
                                                         DateTime.YYYY_MM_DD),
                                         likeRepository.getTotalLike(paramsLiked) != 0,
-                                        0,
                                         0);
                 } else {
                         return new PostResponse(p.getId(), p.getAuthorId(),
@@ -78,7 +77,6 @@ public class PostUtils {
                                         DateFormat.toDateString(p.getModified(),
                                                         DateTime.YYYY_MM_DD),
                                         likeRepository.getTotalLike(paramsLiked) != 0,
-                                        p.getEnabled(),
                                         p.getDeleted());
                 }
         }

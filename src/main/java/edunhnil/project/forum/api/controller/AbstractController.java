@@ -38,7 +38,7 @@ public abstract class AbstractController<s> {
     @Value("${spring.key.jwt}")
     protected String JWT_SECRET;
 
-    protected void validateToken(HttpServletRequest request) {
+    protected String validateToken(HttpServletRequest request, boolean hasPublic) {
         if (tokenProvider.validateToken(request)) {
             String token = JwtUtils.getJwtFromRequest(request);
             User user = tokenProvider.getUserInfoFromToken(token)
@@ -54,8 +54,11 @@ public abstract class AbstractController<s> {
             if (permissions.size() == 0) {
                 throw new ForbiddenException("Access denied!");
             }
+            return user.get_id().toString();
         } else {
-            throw new UnauthorizedException("Unauthorized");
+            if (!hasPublic)
+                throw new UnauthorizedException("Unauthorized");
+            return "public";
         }
     }
 

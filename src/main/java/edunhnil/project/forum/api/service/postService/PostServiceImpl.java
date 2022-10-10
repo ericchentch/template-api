@@ -176,22 +176,6 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         }
 
         @Override
-        public void changeAdminEnabled(int input, String id) {
-                Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", id);
-                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
-                                .get();
-                if (posts.size() == 0) {
-                        throw new ResourceNotFoundException("Not found post with id: " +
-                                        id);
-                }
-                Post post = posts.get(0);
-                post.setEnabled(input);
-                post.setModified(DateFormat.getCurrentTime());
-                repository.savePost(post);
-        }
-
-        @Override
         public void deleteUserPostById(String id, String loginId) {
                 Map<String, String> postIds = new HashMap<>();
                 postIds.put("id", id);
@@ -209,25 +193,6 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 post.setDeleted(1);
                 repository.savePost(post);
 
-        }
-
-        @Override
-        public void changeUserEnabled(int input, String id, String loginId) {
-                Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", id);
-                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
-                                .get();
-                if (posts.size() == 0) {
-                        throw new ResourceNotFoundException("Not found post with id: " +
-                                        id);
-                }
-                Post post = posts.get(0);
-                if (post.getAuthorId().compareTo(loginId) != 0) {
-                        throw new ForbiddenException("Access denied!");
-                }
-                post.setEnabled(input);
-                post.setModified(DateFormat.getCurrentTime());
-                repository.savePost(post);
         }
 
         private void changePublic(Map<String, String> allParams, String loginId, String compareKey) {

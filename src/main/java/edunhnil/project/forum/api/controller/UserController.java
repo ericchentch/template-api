@@ -21,7 +21,6 @@ import edunhnil.project.forum.api.dto.userDTO.ChangePasswordReq;
 import edunhnil.project.forum.api.dto.userDTO.ChangeUsernameReq;
 import edunhnil.project.forum.api.dto.userDTO.UserRequest;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
-import edunhnil.project.forum.api.jwt.JwtUtils;
 import edunhnil.project.forum.api.service.userService.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -41,7 +40,7 @@ public class UserController extends AbstractController<UserService> {
                         @RequestParam Map<String, String> allParams,
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 return response(service.getUsers(allParams, keySort, page, pageSize, sortField),
                                 "Get list of users successfully!");
         }
@@ -62,16 +61,14 @@ public class UserController extends AbstractController<UserService> {
         @GetMapping(value = "admin/get-detail-user")
         public ResponseEntity<CommonResponse<UserResponse>> getUserById(HttpServletRequest request,
                         @RequestParam(required = true) String id) {
-                validateToken(request);
+                validateToken(request, false);
                 return response(service.getUserById(id), "Get user successfully!");
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
         @GetMapping(value = "user/get-profile")
         public ResponseEntity<CommonResponse<UserResponse>> getProfile(HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 return response(service.getUserById(id), "Get user successfully!");
         }
 
@@ -79,7 +76,7 @@ public class UserController extends AbstractController<UserService> {
         @PostMapping(value = "admin/add-new-user")
         public ResponseEntity<CommonResponse<String>> addNewUser(@RequestBody UserRequest userRequest,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.addNewUser(userRequest);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add user successfully!",
@@ -93,7 +90,7 @@ public class UserController extends AbstractController<UserService> {
         public ResponseEntity<CommonResponse<String>> updateUserAdmin(@RequestBody UserRequest userRequest,
                         @RequestParam(required = true) String userId,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.updateUserById(userRequest, userId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update user successfully!",
@@ -106,7 +103,7 @@ public class UserController extends AbstractController<UserService> {
         @DeleteMapping(value = "admin/delete-user")
         public ResponseEntity<CommonResponse<String>> deleteUserUser(HttpServletRequest request,
                         @RequestParam(required = true) String userId) {
-                validateToken(request);
+                validateToken(request, false);
                 service.deleteUserById(userId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete user successfully!",
@@ -119,9 +116,7 @@ public class UserController extends AbstractController<UserService> {
         @PutMapping(value = "user/update-user")
         public ResponseEntity<CommonResponse<String>> updateUserUser(HttpServletRequest request,
                         @RequestBody UserRequest userRequest) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.updateUserById(userRequest, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update successfully!",
@@ -133,9 +128,7 @@ public class UserController extends AbstractController<UserService> {
         @SecurityRequirement(name = "Bearer Authentication")
         @DeleteMapping(value = "user/delete-user")
         public ResponseEntity<CommonResponse<String>> deleteUserAdmin(HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.deleteUserById(id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete successfully!",
@@ -148,9 +141,7 @@ public class UserController extends AbstractController<UserService> {
         @PutMapping(value = "user/change-password")
         public ResponseEntity<CommonResponse<String>> changePassword(@RequestBody ChangePasswordReq changePassword,
                         HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.changePasswordById(changePassword, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Change password successfully!",
@@ -163,9 +154,7 @@ public class UserController extends AbstractController<UserService> {
         @PutMapping(value = "user/change-username")
         public ResponseEntity<CommonResponse<String>> changeUsername(@RequestBody ChangeUsernameReq changeUsername,
                         HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.changeUsernameById(changeUsername, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Change username successfully!",
@@ -177,9 +166,7 @@ public class UserController extends AbstractController<UserService> {
         @SecurityRequirement(name = "Bearer Authentication")
         @PutMapping(value = "user/change-2fa-status")
         public ResponseEntity<CommonResponse<String>> change2FAStatus(HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.change2FAStatus(id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Change 2FA status successfully!",

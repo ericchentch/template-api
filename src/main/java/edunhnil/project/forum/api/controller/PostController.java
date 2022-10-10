@@ -39,8 +39,8 @@ public class PostController extends AbstractController<PostService> {
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField,
                         @RequestParam Map<String, String> allParams, HttpServletRequest request) {
-                validateToken(request);
-                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
+                String loginId = validateToken(request, true);
+                JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 return response(service.getPostsByAuthorId(allParams, keySort, page,
                                 pageSize, sortField, loginId),
@@ -63,9 +63,7 @@ public class PostController extends AbstractController<PostService> {
         @GetMapping(value = "admin/get-post")
         public ResponseEntity<CommonResponse<PostResponse>> getPostAdmin(@RequestParam(required = true) String postId,
                         HttpServletRequest request) {
-                validateToken(request);
-                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String loginId = validateToken(request, false);
                 return response(service.getPrivatePost(postId, loginId), "Get post successfully!");
         }
 
@@ -73,9 +71,7 @@ public class PostController extends AbstractController<PostService> {
         @GetMapping(value = "user/get-post")
         public ResponseEntity<CommonResponse<PostResponse>> getPostUser(@RequestParam(required = true) String postId,
                         HttpServletRequest request) {
-                validateToken(request);
-                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String loginId = validateToken(request, false);
                 return response(service.getPrivatePost(postId, loginId), "Get post successfully!");
         }
 
@@ -89,9 +85,7 @@ public class PostController extends AbstractController<PostService> {
         @PostMapping(value = "user/add-new-post")
         public ResponseEntity<CommonResponse<String>> addNewPost(@RequestBody PostRequest postRequest,
                         HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.addNewPost(postRequest, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add new post successfully!",
@@ -105,22 +99,19 @@ public class PostController extends AbstractController<PostService> {
         public ResponseEntity<CommonResponse<String>> updatePost(@RequestParam(required = true) String postId,
                         @RequestBody PostRequest postUpdateReq,
                         HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String id = validateToken(request, false);
                 service.updatePostById(postUpdateReq, postId, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update post successfully!",
                                                 HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
+                                null, HttpStatus.OK.value());
         }
 
         @SecurityRequirement(name = "Bearer Authentication")
         @DeleteMapping(value = "admin/delete-post")
         public ResponseEntity<CommonResponse<String>> deletePostAdmin(@RequestParam(required = true) String postId,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.deleteAdminPostById(postId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete post successfully!",
@@ -133,42 +124,12 @@ public class PostController extends AbstractController<PostService> {
         @DeleteMapping(value = "user/delete-post")
         public ResponseEntity<CommonResponse<String>> deletePostUser(@RequestParam(required = true) String postId,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
                                 JWT_SECRET);
                 service.deleteUserPostById(postId, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete post successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "admin/change-enabled")
-        public ResponseEntity<CommonResponse<String>> changeEnabledAdmin(@RequestParam(required = true) String postId,
-                        @RequestParam(required = true, defaultValue = "0") int input,
-                        HttpServletRequest request) {
-                validateToken(request);
-                service.changeAdminEnabled(input, postId);
-                return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Update post successfully!",
-                                                HttpStatus.OK.value()),
-                                null,
-                                HttpStatus.OK.value());
-        }
-
-        @SecurityRequirement(name = "Bearer Authentication")
-        @PutMapping(value = "user/change-enabled")
-        public ResponseEntity<CommonResponse<String>> changeEnabledUser(@RequestParam(required = true) String postId,
-                        @RequestParam(required = true, defaultValue = "0") int input,
-                        HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
-                service.changeUserEnabled(input, postId, id);
-                return new ResponseEntity<CommonResponse<String>>(
-                                new CommonResponse<String>(true, null, "Update post successfully!",
                                                 HttpStatus.OK.value()),
                                 null,
                                 HttpStatus.OK.value());

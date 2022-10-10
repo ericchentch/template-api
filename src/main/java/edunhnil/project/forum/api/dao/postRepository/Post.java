@@ -18,6 +18,5 @@ public class Post {
     private String categoryId;
     private Date created;
     private Date modified;
-    private int enabled;
     private int deleted;
 }

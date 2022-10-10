@@ -34,7 +34,7 @@ public class FeatureController extends AbstractController<FeatureService> {
                         @RequestParam Map<String, String> allParams,
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 return response(service.getFeatures(allParams, keySort, page, pageSize, sortField),
                                 "Get list of features successfully!");
         }
@@ -43,7 +43,7 @@ public class FeatureController extends AbstractController<FeatureService> {
         @PostMapping(value = "add-new-feature")
         public ResponseEntity<CommonResponse<String>> addNewFeature(
                         @RequestBody FeatureRequest featureRequest, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.addNewFeature(featureRequest);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add feature successfully!",
@@ -57,7 +57,7 @@ public class FeatureController extends AbstractController<FeatureService> {
         public ResponseEntity<CommonResponse<String>> updateFeature(
                         @RequestBody FeatureRequest featureRequest, @RequestParam(required = true) String id,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.editFeature(featureRequest, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Update feature successfully!",
@@ -70,7 +70,7 @@ public class FeatureController extends AbstractController<FeatureService> {
         @DeleteMapping(value = "delete-feature")
         public ResponseEntity<CommonResponse<String>> updateFeature(
                         @RequestParam(required = true) String id, HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.deleteFeature(id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete feature successfully!",

@@ -28,8 +28,4 @@ public interface PostService {
 
         void deleteAdminPostById(String id);
 
-        void changeUserEnabled(int input, String id, String loginId);
-
-        void changeAdminEnabled(int input, String id);
-
 }

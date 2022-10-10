@@ -19,7 +19,6 @@ import edunhnil.project.forum.api.dto.commentDTO.CommentRequest;
 import edunhnil.project.forum.api.dto.commentDTO.CommentResponse;
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
-import edunhnil.project.forum.api.jwt.JwtUtils;
 import edunhnil.project.forum.api.service.commentService.CommentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -49,9 +48,7 @@ public class CommentController extends AbstractController<CommentService> {
                         @RequestParam(required = false, defaultValue = "1") int page,
                         @RequestParam(defaultValue = "modified") String sortField,
                         @RequestParam(defaultValue = "asc") String keySort, HttpServletRequest request) {
-                validateToken(request);
-                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String loginId = validateToken(request, true);
                 return response(
                                 service.getPublicComment(postId, page, keySort, sortField, loginId),
                                 "Get list of comments successfully!");
@@ -65,9 +62,7 @@ public class CommentController extends AbstractController<CommentService> {
                         @RequestParam(defaultValue = "asc") String keySort,
                         @RequestParam(defaultValue = "modified") String sortField,
                         @RequestParam Map<String, String> allParams, HttpServletRequest request) {
-                validateToken(request);
-                String loginId = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request),
-                                JWT_SECRET);
+                String loginId = validateToken(request, false);
                 return response(
                                 service.getAdminComment(allParams, keySort, page, pageSize, sortField, loginId),
                                 "Get list of comments successfully!");
@@ -78,9 +73,8 @@ public class CommentController extends AbstractController<CommentService> {
         public ResponseEntity<CommonResponse<String>> addNewComment(@RequestBody CommentRequest commentRequest,
                         HttpServletRequest request,
                         @RequestParam(required = true) String postId) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
-                service.addNewComment(commentRequest, postId, id);
+                String loginId = validateToken(request, false);
+                service.addNewComment(commentRequest, postId, loginId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Add comment successfully!",
                                                 HttpStatus.OK.value()),
@@ -93,8 +87,7 @@ public class CommentController extends AbstractController<CommentService> {
         public ResponseEntity<CommonResponse<String>> editComment(@RequestBody CommentRequest commentRequest,
                         HttpServletRequest request,
                         @RequestParam(required = true) String commentId) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
+                String id = validateToken(request, false);
                 service.editCommentById(commentRequest, commentId, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Edit comment successfully!",
@@ -107,8 +100,7 @@ public class CommentController extends AbstractController<CommentService> {
         @DeleteMapping(value = "user/delete-comment")
         public ResponseEntity<CommonResponse<String>> userDeleteComment(@RequestParam(required = true) String commentId,
                         HttpServletRequest request) {
-                validateToken(request);
-                String id = JwtUtils.getUserIdFromJwt(JwtUtils.getJwtFromRequest(request), JWT_SECRET);
+                String id = validateToken(request, false);
                 service.deleteUserComment(commentId, id);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete comment successfully!",
@@ -122,7 +114,7 @@ public class CommentController extends AbstractController<CommentService> {
         public ResponseEntity<CommonResponse<String>> adminDeleteComment(
                         @RequestParam(required = true) String commentId,
                         HttpServletRequest request) {
-                validateToken(request);
+                validateToken(request, false);
                 service.deleteAdminComment(commentId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Delete comment successfully!",
