@@ -8,12 +8,6 @@ public interface UserRepository {
         Optional<List<User>> getUsers(Map<String, String> allParams, String keySort, int page, int pageSize,
                         String sortField);
 
-        Optional<User> getUserById(String id);
-
-        Optional<User> checkUsername(String username);
-
-        Optional<User> getUserByEmail(String email);
-
         void insertAndUpdate(User user);
 
         long getTotalPage(Map<String, String> allParams);

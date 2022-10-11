@@ -27,4 +27,9 @@ public class PostRepositoryImpl extends AbstractRepository implements PostReposi
         save(post, ignores);
     }
 
+    @Override
+    public int getTotal(Map<String, String> allParams) {
+        return getTotal(allParams, Post.class);
+    }
+
 }

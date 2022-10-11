@@ -1,6 +1,7 @@
 package edunhnil.project.forum.api.service.userService;
 
-import java.util.HashMap;
+import static java.util.Map.entry;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,14 +45,12 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                                                                 isPublic(user.get_id().toString(), loginId,
                                                                                 skipAccessability)))
                                                 .collect(Collectors.toList()),
-                                page, pageSize, 0));
+                                page, pageSize, repository.getTotalPage(allParams)));
         }
 
         @Override
         public Optional<UserResponse> getUserById(String id, String loginId, boolean skipAccessability) {
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("_id", id);
-                List<User> users = repository.getUsers(allParams, "", 0, 0, "").get();
+                List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
                 if (users.size() == 0) {
                         throw new ResourceNotFoundException("Not found user!");
                 }
@@ -62,7 +61,10 @@ public class UserServiceImpl extends AbstractService<UserRepository>
 
         @Override
         public void addNewUser(UserRequest userRequest) {
-                if (repository.checkUsername(userRequest.getUsername()).isPresent()) {
+                List<User> users = repository
+                                .getUsers(Map.ofEntries(entry("username", userRequest.getUsername())), "", 0, 0, "")
+                                .get();
+                if (users.size() != 0) {
                         throw new InvalidRequestException("username existed");
                 }
                 validate(userRequest);
@@ -78,8 +80,11 @@ public class UserServiceImpl extends AbstractService<UserRepository>
 
         @Override
         public void updateUserById(UserRequest userRequest, String loginId, String id, boolean skipAccessability) {
-                User oldUser = repository.getUserById(id).orElseThrow(
-                                () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
+                List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+                if (users.size() == 0) {
+                        throw new ResourceNotFoundException("Not found user!");
+                }
+                User oldUser = users.get(0);
                 validate(userRequest);
                 checkAccessability(loginId, id, skipAccessability);
                 PasswordValidator.validateNewPassword(userRequest.getPassword());
@@ -92,8 +97,11 @@ public class UserServiceImpl extends AbstractService<UserRepository>
 
         @Override
         public void deleteUserById(String id, String loginId, boolean skipAccessability) {
-                User oldUser = repository.getUserById(id).orElseThrow(
-                                () -> new ResourceNotFoundException("Not found user with id: " + id + "!"));
+                List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+                if (users.size() == 0) {
+                        throw new ResourceNotFoundException("Not found user!");
+                }
+                User oldUser = users.get(0);
                 checkAccessability(loginId, id, skipAccessability);
                 User user = objectMapper.convertValue(oldUser, User.class);
                 user.setDeleted(1);
@@ -107,8 +115,11 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                 PasswordValidator.validatePassword(changePassword.getOldPassword());
                 PasswordValidator.validateNewPassword(changePassword.getNewPassword());
                 BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-                User user = repository.getUserById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Not found id: " + id));
+                List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+                if (users.size() == 0) {
+                        throw new ResourceNotFoundException("Not found user!");
+                }
+                User user = users.get(0);
                 if (!bCryptPasswordEncoder.matches(changePassword.getOldPassword(),
                                 user.getPassword())) {
                         throw new InvalidRequestException("Old password does not match!");

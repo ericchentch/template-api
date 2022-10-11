@@ -1,7 +1,8 @@
 package edunhnil.project.forum.api.service.permissionService;
 
+import static java.util.Map.entry;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,9 +57,8 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
     @Override
     public void addNewPermissions(PermissionRequest permissionRequest) {
         validate(permissionRequest);
-        Map<String, String> permissionParams = new HashMap<>();
-        permissionParams.put("name", permissionRequest.getName());
-        List<Permission> permissions = repository.getPermissions(permissionParams, "", 0, 0, "").get();
+        List<Permission> permissions = repository
+                .getPermissions(Map.ofEntries(entry("name", permissionRequest.getName())), "", 0, 0, "").get();
         if (permissions.size() != 0) {
             throw new InvalidRequestException("This name is unavailable!");
         }
@@ -132,16 +132,13 @@ public class PermissionServiceImpl extends AbstractService<PermissionRepository>
 
     private List<FeatureResponse> generateFeatureList(List<String> features) {
         String result = generateParamsValue(features);
-        Map<String, String> featureParams = new HashMap<>();
-        featureParams.put("_id", result.toString());
-        return featureService.getFeatures(featureParams, "", 0, 0, "").get().getData();
+        return featureService.getFeatures(Map.ofEntries(entry("_id", result.toString())), "", 0, 0, "").get().getData();
     }
 
     private List<UserResponse> generateUserList(List<String> users) {
         String result = generateParamsValue(users);
-        Map<String, String> userParams = new HashMap<>();
-        userParams.put("_id", result.toString());
-        return userService.getUsers(userParams, "", 0, 0, "", "public", false).get().getData();
+        return userService.getUsers(Map.ofEntries(entry("_id", result.toString())), "", 0, 0, "", "public", false).get()
+                .getData();
     }
 
 }

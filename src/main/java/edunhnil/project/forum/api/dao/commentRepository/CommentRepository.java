@@ -10,4 +10,6 @@ public interface CommentRepository {
 
     void saveComment(Comment comment);
 
+    int getTotal(Map<String, String> allParams);
+
 }

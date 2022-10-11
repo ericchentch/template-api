@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.service.featureService;
 
+import static java.util.Map.entry;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,13 +28,14 @@ public class FeatureServiceImpl extends AbstractService<FeatureRepository> imple
         return Optional.of(new ListWrapperResponse<FeatureResponse>(
                 features.stream().map(f -> new FeatureResponse(f.get_id().toString(), f.getName(), f.getPath(),
                         f.getDeleted())).collect(Collectors.toList()),
-                page, pageSize, features.size()));
+                page, pageSize, repository.getTotal(allParams)));
     }
 
     @Override
     public void addNewFeature(FeatureRequest featureRequest) {
         validate(featureRequest);
-        if (repository.getFeatureByPath(featureRequest.getPath()).isPresent()) {
+        if (repository.getFeatures(Map.ofEntries(entry("path", featureRequest.getPath())), "", 0, 0, "").get()
+                .size() != 0) {
             throw new InvalidRequestException("This feature existed");
         }
         Feature feature = objectMapper.convertValue(featureRequest, Feature.class);
@@ -42,8 +45,10 @@ public class FeatureServiceImpl extends AbstractService<FeatureRepository> imple
     @Override
     public void editFeature(FeatureRequest featureRequest, String id) {
         validate(featureRequest);
-        Feature feature = repository.getFeatureById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found feature!"));
+        List<Feature> features = repository.getFeatures(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+        if (features.size() == 0)
+            throw new ResourceNotFoundException("Not found feature!");
+        Feature feature = features.get(0);
         feature.setName(featureRequest.getName());
         feature.setPath(featureRequest.getPath());
         repository.insertAndUpdate(feature);
@@ -51,8 +56,10 @@ public class FeatureServiceImpl extends AbstractService<FeatureRepository> imple
 
     @Override
     public void deleteFeature(String id) {
-        Feature feature = repository.getFeatureById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found feature!"));
+        List<Feature> features = repository.getFeatures(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+        if (features.size() == 0)
+            throw new ResourceNotFoundException("Not found feature!");
+        Feature feature = features.get(0);
         feature.setDeleted(1);
         repository.insertAndUpdate(feature);
     }

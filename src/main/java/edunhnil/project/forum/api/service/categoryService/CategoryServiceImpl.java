@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.service.categoryService;
 
+import static java.util.Map.entry;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +40,11 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                 .orElseThrow(() -> new ResourceNotFoundException("not found"));
                 List<CategoryResponse> result = new ArrayList<>();
                 for (Category c : categories) {
-                        Map<String, String> allParams = new HashMap<String, String>();
-                        allParams.put("categoryId", c.getId());
-                        allParams.put("deleted", "0");
-                        allParams.put("enabled", "0");
                         List<Post> posts = postRepository
-                                        .getPostsByAuthorId(allParams, "DESC", 1, 10, "created")
+                                        .getPostsByAuthorId(
+                                                        Map.ofEntries(entry("categoryId", c.getId()),
+                                                                        entry("deleted", "0")),
+                                                        "DESC", 1, 10, "created")
                                         .orElseThrow(() -> new ResourceNotFoundException("Not found any post"));
                         if (posts.size() != 0) {
                                 PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public", "");
@@ -59,10 +60,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
 
         @Override
         public Optional<CategoryResponse> getCategoryById(String id) {
-                Map<String, String> ids = new HashMap<>();
-                ids.put("id", id);
-                List<Category> categories = repository.getCategories(ids).get();
-                System.out.println(categories.size());
+                List<Category> categories = repository.getCategories(Map.ofEntries(entry("id", id))).get();
                 if (categories.size() == 0)
                         return Optional.of(new CategoryResponse("",
                                         "Deleted category",
@@ -92,9 +90,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
 
         @Override
         public Optional<CategoryResponse> getCategoryDetailById(String id) {
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Category> categories = repository.getCategories(allParams).get();
+                List<Category> categories = repository.getCategories(Map.ofEntries(entry("id", id))).get();
                 if (categories.size() == 0)
                         return Optional.of(new CategoryResponse("",
                                         "Deleted category",
@@ -107,9 +103,8 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
         @Override
         public void saveCategory(CategoryRequest categoryRequest) {
                 validate(categoryRequest);
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("categoryName", categoryRequest.getName());
-                List<Category> categories = repository.getCategories(allParams).get();
+                List<Category> categories = repository
+                                .getCategories(Map.ofEntries(entry("categoryName", categoryRequest.getName()))).get();
                 if (categories.size() != 0) {
                         throw new InvalidRequestException("This name is not available!");
                 }
@@ -119,9 +114,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
 
         @Override
         public void deleteCategory(String id) {
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Category> categories = repository.getCategories(allParams).get();
+                List<Category> categories = repository.getCategories(Map.ofEntries(entry("id", id))).get();
                 if (categories.size() != 0) {
                         throw new ResourceNotFoundException("This category is not available!");
                 }
@@ -131,9 +124,7 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
         @Override
         public void updateCategory(CategoryRequest categoryRequest, String id) {
                 validate(categoryRequest);
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Category> categories = repository.getCategories(allParams).get();
+                List<Category> categories = repository.getCategories(Map.ofEntries(entry("id", id))).get();
                 if (categories.size() != 0) {
                         throw new ResourceNotFoundException("This category is not available!");
                 }

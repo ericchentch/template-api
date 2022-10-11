@@ -1,8 +1,10 @@
 package edunhnil.project.forum.api.utils;
 
+import static java.util.Map.entry;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.commentDTO.CommentResponse;
 import edunhnil.project.forum.api.dto.userDTO.UserResponse;
+import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 
 @Component
 public class CommentUtils {
@@ -64,16 +67,19 @@ public class CommentUtils {
     }
 
     private UserResponse returnUser(String userId, String type) {
-        Optional<User> user = userRepository.getUserById(userId);
+        List<User> users = userRepository.getUsers(Map.ofEntries(entry("_id", userId)), "", 0, 0, "").get();
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Not found user!");
+        }
         User deletedUser = new User(new ObjectId(userId), "", "", 0, "", "", "Deleted user", "", "", "", "",
                 null,
                 null, "",
                 false,
                 false, null, 0);
-        if (user.isEmpty()) {
+        if (users.size() == 0) {
             return userUtils.generateUserResponse(deletedUser, type);
         } else {
-            return userUtils.generateUserResponse(user.get(), type);
+            return userUtils.generateUserResponse(users.get(0), type);
         }
     }
 }

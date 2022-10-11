@@ -1,6 +1,10 @@
 package edunhnil.project.forum.api.jwt;
 
+import static java.util.Map.entry;
+
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
+import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -45,7 +50,11 @@ public class JwtTokenProvider {
 
     public Optional<User> getUserInfoFromToken(String token) {
         String id = JwtUtils.getUserIdFromJwt(token, JWT_SECRET);
-        return userRepository.getUserById(id);
+        List<User> users = userRepository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Not found user!");
+        }
+        return Optional.of(users.get(0));
     }
 
     public boolean validateToken(HttpServletRequest request) {
