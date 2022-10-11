@@ -3,7 +3,6 @@ package edunhnil.project.forum.api.service.categoryService;
 import static java.util.Map.entry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,14 +65,12 @@ public class CategoryServiceImpl extends AbstractService<CategoryRepository>
                                         "Deleted category",
                                         0, null));
                 Category category = categories.get(0);
-                List<String> searchField = new ArrayList<>();
-                searchField.add("category_id");
-                Map<String, String> allParams = new HashMap<String, String>();
-                allParams.put("category_id", category.getId());
-                allParams.put("deleted", "0");
-                allParams.put("enabled", "0");
-                List<Post> posts = postRepository.getPostsByAuthorId(allParams, "DESC", 1,
-                                10, "created")
+                List<Post> posts = postRepository
+                                .getPostsByAuthorId(
+                                                Map.ofEntries(entry("category_id", category.getId()),
+                                                                entry("deleted", "0")),
+                                                "DESC", 1,
+                                                10, "created")
                                 .get();
                 if (posts.size() != 0) {
                         PostResponse newestPost = postUtils.generatePostResponse(posts.get(0), "public", "");
