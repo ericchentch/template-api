@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +16,8 @@ import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.categoryDTO.CategoryResponse;
+import edunhnil.project.forum.api.dto.commonDTO.UserInformation;
 import edunhnil.project.forum.api.dto.postDTO.PostResponse;
-import edunhnil.project.forum.api.dto.userDTO.UserResponse;
-import edunhnil.project.forum.api.exception.ResourceNotFoundException;
 import edunhnil.project.forum.api.service.categoryService.CategoryService;
 
 @Component
@@ -34,12 +32,9 @@ public class PostUtils {
         @Autowired
         private LikeRepository likeRepository;
 
-        @Autowired
-        private UserUtils userUtils;
-
         public PostResponse generatePostResponse(Post p, String type, String loginId) {
 
-                Optional<CategoryResponse> categorySerRes = categoryService.getCategoryDetailById(p.getCategoryId());
+                Optional<CategoryResponse> categorySerRes = categoryService.getCategoryById(p.getCategoryId());
                 CategoryResponse category = categorySerRes.get();
 
                 Map<String, String> allParams = new HashMap<>();
@@ -52,17 +47,17 @@ public class PostUtils {
                 paramsLiked.put("ownerId", loginId);
 
                 if (type.compareTo("public") == 0) {
+                        allParams.put("deleted", "0");
                         paramsLiked.put("deleted", "0");
                 }
 
                 if (type.compareTo("public") == 0) {
-                        return new PostResponse(p.getId(), p.getAuthorId(),
-                                        returnUser(p.getAuthorId(), type),
+                        return new PostResponse(p.getId(),
+                                        returnUser(p.getAuthorId()),
                                         p.getTitle(),
                                         p.getContent(),
                                         p.getView(),
                                         likeRepository.getTotalLike(allParams),
-                                        p.getCategoryId(),
                                         category,
                                         DateFormat.toDateString(p.getCreated(),
                                                         DateTime.YYYY_MM_DD),
@@ -71,13 +66,12 @@ public class PostUtils {
                                         false,
                                         0);
                 } else {
-                        return new PostResponse(p.getId(), p.getAuthorId(),
-                                        returnUser(p.getAuthorId(), type),
+                        return new PostResponse(p.getId(),
+                                        returnUser(p.getAuthorId()),
                                         p.getTitle(),
                                         p.getContent(),
                                         p.getView(),
                                         likeRepository.getTotalLike(allParams),
-                                        p.getCategoryId(),
                                         category,
                                         DateFormat.toDateString(p.getCreated(),
                                                         DateTime.YYYY_MM_DD),
@@ -88,20 +82,12 @@ public class PostUtils {
                 }
         }
 
-        private UserResponse returnUser(String userId, String type) {
+        private UserInformation returnUser(String userId) {
                 List<User> users = userRepository.getUsers(Map.ofEntries(entry("_id", userId)), "", 0, 0, "").get();
                 if (users.size() == 0) {
-                        throw new ResourceNotFoundException("Not found user!");
-                }
-                User deletedUser = new User(new ObjectId(userId), "", "", 0, "", "", "Deleted user", "", "", "", "",
-                                null,
-                                null, "",
-                                false,
-                                false, null, 0);
-                if (users.size() == 0) {
-                        return userUtils.generateUserResponse(deletedUser, type);
+                        return new UserInformation("", "", "Deleted user");
                 } else {
-                        return userUtils.generateUserResponse(users.get(0), type);
+                        return new UserInformation(userId, users.get(0).getLastName(), users.get(0).getFirstName());
                 }
         }
 }

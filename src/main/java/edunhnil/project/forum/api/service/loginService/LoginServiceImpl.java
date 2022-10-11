@@ -49,6 +49,7 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             if (users.size() == 0) {
                 throw new ResourceNotFoundException("Not found user with email: " + loginRequest.getUsername());
             }
+            user = users.get(0);
         } else {
             List<User> users = repository
                     .getUsers(Map.ofEntries(entry("username", loginRequest.getUsername())), "", 0, 0, "").get();
@@ -56,6 +57,7 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
                 throw new ResourceNotFoundException(
                         "Not found user with username: " + loginRequest.getUsername());
             }
+            user = users.get(0);
         }
         if (!user.isVerified())
             throw new InvalidRequestException("This account is not verified!");
@@ -195,12 +197,14 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             if (users.size() == 0) {
                 throw new ResourceNotFoundException("Not found user with email: " + email);
             }
+            user = users.get(0);
         } else {
             List<User> users = repository.getUsers(Map.ofEntries(entry("username", email)), "", 0, 0, "").get();
             if (users.size() == 0) {
                 throw new ResourceNotFoundException(
                         "Not found user with username: " + email);
             }
+            user = users.get(0);
         }
         Date now = new Date();
         if (user.getCode().compareTo(code) != 0)

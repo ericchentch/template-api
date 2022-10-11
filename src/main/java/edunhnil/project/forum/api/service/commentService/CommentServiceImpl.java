@@ -44,6 +44,9 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                         String keySort, int page,
                         int pageSize,
                         String sortField, String loginId, boolean skipAccessability) {
+                if (loginId.compareTo("public") == 0) {
+                        allParams.put("deleted", "0");
+                }
                 List<Comment> comments = repository.getAllComment(allParams, keySort, page, pageSize, sortField).get();
                 return Optional
                                 .of(new ListWrapperResponse<CommentResponse>(

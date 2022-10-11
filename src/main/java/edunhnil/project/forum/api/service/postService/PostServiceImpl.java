@@ -43,6 +43,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         public Optional<ListWrapperResponse<PostResponse>> getPosts(Map<String, String> allParams,
                         String keySort, int page,
                         int pageSize, String sortField, String loginId, boolean skipAccessability) {
+                if (loginId.compareTo("public") == 0) {
+                        allParams.put("deleted", "0");
+                }
                 List<Post> posts = repository
                                 .getPostsByAuthorId(allParams, keySort, page, pageSize,
                                                 sortField)
@@ -67,7 +70,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 Post post = posts.get(0);
                 post.setView(post.getView() + 1);
                 return Optional.of(postUtils.generatePostResponse(post,
-                                isPublic(posts.get(0).getAuthorId(), loginId, skipAccessability), "a"));
+                                isPublic(posts.get(0).getAuthorId(), loginId, skipAccessability), loginId));
         }
 
         @Override
