@@ -1,6 +1,7 @@
 package edunhnil.project.forum.api.service.commentService;
 
-import java.util.HashMap;
+import static java.util.Map.entry;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +44,9 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                         String keySort, int page,
                         int pageSize,
                         String sortField, String loginId, boolean skipAccessability) {
+                if (loginId.compareTo("public") == 0) {
+                        allParams.put("deleted", "0");
+                }
                 List<Comment> comments = repository.getAllComment(allParams, keySort, page, pageSize, sortField).get();
                 return Optional
                                 .of(new ListWrapperResponse<CommentResponse>(
@@ -52,15 +56,14 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
                                                                                                 skipAccessability),
                                                                                 loginId))
                                                                 .collect(Collectors.toList()),
-                                                page, pageSize, comments.size()));
+                                                page, pageSize, repository.getTotal(allParams)));
         }
 
         @Override
         public void addNewComment(CommentRequest commentRequest, String postId, String ownerId) {
                 validate(commentRequest);
-                Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", postId);
-                List<Post> posts = postRepository.getPostsByAuthorId(postIds, "", 0, 0, "").get();
+                List<Post> posts = postRepository.getPostsByAuthorId(Map.ofEntries(entry("id", postId)), "", 0, 0, "")
+                                .get();
                 if (posts.size() == 0) {
                         throw new ResourceNotFoundException("Not found post with id: " +
                                         postId);
@@ -80,9 +83,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
         public void editCommentById(CommentRequest commentRequest, String id, String loginId,
                         boolean skipAccessability) {
                 validate(commentRequest);
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
+                List<Comment> comments = repository.getAllComment(Map.ofEntries(entry("id", id)), "", 0, 0, "")
                                 .get();
                 if (comments.size() == 0) {
                         throw new ResourceNotFoundException("Not found comment with id:" + id);
@@ -96,9 +97,7 @@ public class CommentServiceImpl extends AbstractService<CommentRepository>
 
         @Override
         public void deleteComment(String id, String loginId, boolean skipAccessability) {
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Comment> comments = repository.getAllComment(allParams, "", 0, 0, "")
+                List<Comment> comments = repository.getAllComment(Map.ofEntries(entry("id", id)), "", 0, 0, "")
                                 .get();
                 if (comments.size() == 0) {
                         throw new ResourceNotFoundException("Not found comment with id:" + id);

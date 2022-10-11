@@ -10,4 +10,6 @@ public interface PostRepository {
 
         void savePost(Post post);
 
+        int getTotal(Map<String, String> allParams);
+
 }

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import edunhnil.project.forum.api.dao.AbstractMongoRepository;
+
 @Repository
 public class FileRepositoryImpl extends AbstractMongoRepository implements FileRepository {
 
@@ -17,7 +18,8 @@ public class FileRepositoryImpl extends AbstractMongoRepository implements FileR
     }
 
     @Override
-    public Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize, String keySort, String sortField) {
+    public Optional<List<File>> getFiles(Map<String, String> allParams, int page, int pageSize, String keySort,
+            String sortField) {
         Query query = generateQueryMongoDB(allParams, File.class, keySort, sortField, page, pageSize);
         Optional<List<File>> total = replaceFind(query, File.class);
         return total;
@@ -28,5 +30,12 @@ public class FileRepositoryImpl extends AbstractMongoRepository implements FileR
         File file = authenticationTemplate.findById(_id, File.class);
         return Optional.ofNullable(file);
     }
-    
+
+    @Override
+    public long getTotal(Map<String, String> allParams) {
+        Query query = generateQueryMongoDB(allParams, File.class, "", "", 0, 0);
+        long total = authenticationTemplate.count(query, File.class);
+        return total;
+    }
+
 }

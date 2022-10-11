@@ -1,7 +1,11 @@
 package edunhnil.project.forum.api.service.loginService;
 
+import static java.util.Map.entry;
+
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +44,20 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
         }
         User user = new User();
         if (loginRequest.getUsername().matches(FormInput.EMAIL)) {
-            user = repository.getUserByEmail(loginRequest.getUsername()).orElseThrow(
-                    () -> new ResourceNotFoundException("Not found user with email: " + loginRequest.getUsername()));
+            List<User> users = repository
+                    .getUsers(Map.ofEntries(entry("email", loginRequest.getUsername())), "", 0, 0, "").get();
+            if (users.size() == 0) {
+                throw new ResourceNotFoundException("Not found user with email: " + loginRequest.getUsername());
+            }
+            user = users.get(0);
         } else {
-            user = repository.checkUsername(loginRequest.getUsername()).orElseThrow(
-                    () -> new ResourceNotFoundException(
-                            "Not found user with username: " + loginRequest.getUsername()));
+            List<User> users = repository
+                    .getUsers(Map.ofEntries(entry("username", loginRequest.getUsername())), "", 0, 0, "").get();
+            if (users.size() == 0) {
+                throw new ResourceNotFoundException(
+                        "Not found user with username: " + loginRequest.getUsername());
+            }
+            user = users.get(0);
         }
         if (!user.isVerified())
             throw new InvalidRequestException("This account is not verified!");
@@ -74,23 +86,30 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Override
     public void logout(String id) {
-        User user = repository.getUserById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User is deactivated or deleted!"));
+        List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Not found user!");
+        }
+        User user = users.get(0);
         user.setToken("");
         repository.insertAndUpdate(user);
     }
 
     @Override
     public void register(RegisterRequest registerRequest) {
-        if (repository.checkUsername(registerRequest.getUsername()).isPresent()) {
+        List<User> users = repository
+                .getUsers(Map.ofEntries(entry("username", registerRequest.getUsername())), "", 0, 0, "").get();
+        if (users.size() != 0) {
             throw new InvalidRequestException("username existed");
         }
-        Optional<User> userCheckMail = repository.getUserByEmail(registerRequest.getEmail());
-        if (userCheckMail.isPresent()) {
-            if (userCheckMail.get().isVerified()) {
+        List<User> usersEmail = repository
+                .getUsers(Map.ofEntries(entry("email", registerRequest.getUsername())), "", 0, 0, "").get();
+        if (usersEmail.size() == 0) {
+            if (usersEmail.get(0).isVerified()) {
                 throw new InvalidRequestException("This email is taken!");
             } else {
                 throw new InvalidRequestException("Please verify your email!");
+
             }
         } else {
             validate(registerRequest);
@@ -113,11 +132,16 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
     public void verifyRegister(String code, String email) {
         User user = new User();
         if (email.matches(FormInput.EMAIL)) {
-            user = repository.getUserByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("This email is invalid!"));
+            List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
+            if (users.size() == 0) {
+                throw new ResourceNotFoundException("Not found user with email: " + email);
+            }
         } else {
-            user = repository.checkUsername(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Username is not exist, please register!"));
+            List<User> users = repository.getUsers(Map.ofEntries(entry("username", email)), "", 0, 0, "").get();
+            if (users.size() == 0) {
+                throw new ResourceNotFoundException(
+                        "Not found user with username: " + email);
+            }
         }
         Date now = new Date();
         if (user.getCode().compareTo(code) != 0)
@@ -132,8 +156,11 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Override
     public void resendVerifyRegister(String email) {
-        User userCheckMail = repository.getUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Email does not exist, please sign up!"));
+        List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Not found user with email: " + email);
+        }
+        User userCheckMail = users.get(0);
         userCheckMail.setCode(CodeGenerator.userCodeGenerator());
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + 5 * 60 * 1000L);
@@ -147,8 +174,11 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Override
     public void forgotPassword(String email) {
-        User userCheckMail = repository.getUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Email does not exist, please sign up!"));
+        List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Not found user with email: " + email);
+        }
+        User userCheckMail = users.get(0);
         String newPassword = CodeGenerator.passwordGenerator();
         userCheckMail
                 .setPassword(
@@ -163,11 +193,18 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
     public Optional<LoginResponse> verify2FA(String email, String code) {
         User user = new User();
         if (email.matches(FormInput.EMAIL)) {
-            user = repository.getUserByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("This email is invalid!"));
+            List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
+            if (users.size() == 0) {
+                throw new ResourceNotFoundException("Not found user with email: " + email);
+            }
+            user = users.get(0);
         } else {
-            user = repository.checkUsername(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Username is not exist, please register!"));
+            List<User> users = repository.getUsers(Map.ofEntries(entry("username", email)), "", 0, 0, "").get();
+            if (users.size() == 0) {
+                throw new ResourceNotFoundException(
+                        "Not found user with username: " + email);
+            }
+            user = users.get(0);
         }
         Date now = new Date();
         if (user.getCode().compareTo(code) != 0)
@@ -183,8 +220,11 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Override
     public void resend2FACode(String email) {
-        User userCheckMail = repository.getUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Email does not exist, please sign up!"));
+        List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Not found user with email: " + email);
+        }
+        User userCheckMail = users.get(0);
         userCheckMail.setCode(CodeGenerator.userCodeGenerator());
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + 5 * 60 * 1000L);

@@ -1,6 +1,9 @@
 package edunhnil.project.forum.api.controller;
 
+import static java.util.Map.entry;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,17 +50,21 @@ public abstract class AbstractController<s> {
             if (user.getToken().compareTo(token) != 0) {
                 throw new UnauthorizedException("Unauthorized");
             }
-            Feature feature = featureRepository.getFeatureByPath(request.getRequestURI())
-                    .orElseThrow(() -> new ResourceNotFoundException("This feature is not enabled!"));
+            List<Feature> feature = featureRepository
+                    .getFeatures(Map.ofEntries(entry("path", request.getRequestURI())), "", 0, 0, "").get();
+            if (feature.size() == 0) {
+                throw new ResourceNotFoundException("This feature is not enabled!");
+            }
             List<Permission> permissions = permissionRepository
-                    .getPermissionByUser(user.get_id().toString(), feature.get_id().toString())
+                    .getPermissionByUser(user.get_id().toString(), feature.get(0).get_id().toString())
                     .orElseThrow(() -> new UnauthorizedException("You are not approved any permissions!"));
             if (permissions.size() == 0) {
                 throw new ForbiddenException("Access denied!");
             }
             boolean skipAccessability = false;
             for (Permission permission : permissions) {
-                if (permission.getSkipAccessability() == 0 && permission.getFeatureId().contains(feature.get_id())) {
+                if (permission.getSkipAccessability() == 0
+                        && permission.getFeatureId().contains(feature.get(0).get_id())) {
                     skipAccessability = true;
                 }
             }

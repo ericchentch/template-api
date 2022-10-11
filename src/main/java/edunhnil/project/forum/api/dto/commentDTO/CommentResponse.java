@@ -1,6 +1,6 @@
 package edunhnil.project.forum.api.dto.commentDTO;
 
-import edunhnil.project.forum.api.dto.userDTO.UserResponse;
+import edunhnil.project.forum.api.dto.commonDTO.UserInformation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommentResponse {
     private String id;
-    private String ownerId;
-    private UserResponse informationOwner;
+    private UserInformation informationOwner;
     private String postId;
     private String content;
     private int like;

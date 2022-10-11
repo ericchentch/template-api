@@ -12,8 +12,6 @@ public interface CategoryService {
 
     Optional<CategoryResponse> getCategoryById(String id);
 
-    Optional<CategoryResponse> getCategoryDetailById(String id);
-
     void saveCategory(CategoryRequest categoryRequest);
 
     void updateCategory(CategoryRequest categoryRequest, String id);

@@ -1,4 +1,4 @@
-package edunhnil.project.forum.api.dto.categoryDTO;
+package edunhnil.project.forum.api.dto.commonDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryResponse {
+public class UserInformation {
     private String id;
-    private String categoryName;
+    private String lastName;
+    private String firstName;
 }

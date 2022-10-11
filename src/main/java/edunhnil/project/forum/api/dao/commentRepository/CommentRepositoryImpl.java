@@ -27,4 +27,9 @@ public class CommentRepositoryImpl extends AbstractRepository implements Comment
         save(comment, ignores);
     }
 
+    @Override
+    public int getTotal(Map<String, String> allParams) {
+        return getTotal(allParams, Comment.class);
+    }
+
 }

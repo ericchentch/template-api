@@ -21,24 +21,8 @@ public class FeatureRepositoryImpl extends AbstractMongoRepository implements Fe
     }
 
     @Override
-    public Optional<Feature> getFeatureById(String id) {
-        Map<String, String> params = new HashMap<>();
-        params.put("_id", id);
-        Query query = generateQueryMongoDB(params, Feature.class, "", "", 0, 0);
-        return replaceFindOne(query, Feature.class);
-    }
-
-    @Override
     public void insertAndUpdate(Feature feature) {
         authenticationTemplate.save(feature, "features");
-    }
-
-    @Override
-    public Optional<Feature> getFeatureByPath(String path) {
-        Map<String, String> params = new HashMap<>();
-        params.put("path", path);
-        Query query = generateQueryMongoDB(params, Feature.class, "", "", 0, 0);
-        return replaceFindOne(query, Feature.class);
     }
 
     @Override
@@ -47,6 +31,13 @@ public class FeatureRepositoryImpl extends AbstractMongoRepository implements Fe
         params.put("_id", id);
         Query query = generateQueryMongoDB(params, Feature.class, "", "", 0, 0);
         authenticationTemplate.remove(query, Feature.class);
+    }
+
+    @Override
+    public long getTotal(Map<String, String> allParams) {
+        Query query = generateQueryMongoDB(allParams, Feature.class, "", "", 0, 0);
+        long total = authenticationTemplate.count(query, Feature.class);
+        return total;
     }
 
 }

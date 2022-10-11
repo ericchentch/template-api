@@ -1,6 +1,7 @@
 package edunhnil.project.forum.api.service.postService;
 
-import java.util.HashMap;
+import static java.util.Map.entry;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +43,9 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         public Optional<ListWrapperResponse<PostResponse>> getPosts(Map<String, String> allParams,
                         String keySort, int page,
                         int pageSize, String sortField, String loginId, boolean skipAccessability) {
+                if (loginId.compareTo("public") == 0) {
+                        allParams.put("deleted", "0");
+                }
                 List<Post> posts = repository
                                 .getPostsByAuthorId(allParams, keySort, page, pageSize,
                                                 sortField)
@@ -52,14 +56,12 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                                                                 isPublic(p.getAuthorId(), loginId, skipAccessability),
                                                                 loginId))
                                                 .collect(Collectors.toList()),
-                                page, pageSize, posts.size()));
+                                page, pageSize, repository.getTotal(allParams)));
         }
 
         @Override
         public Optional<PostResponse> getPostById(String id, String loginId, boolean skipAccessability) {
-                Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", id);
-                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                List<Post> posts = repository.getPostsByAuthorId(Map.ofEntries(entry("id", id)), "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
                         throw new ResourceNotFoundException("Not found post with id: " +
@@ -68,14 +70,12 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 Post post = posts.get(0);
                 post.setView(post.getView() + 1);
                 return Optional.of(postUtils.generatePostResponse(post,
-                                isPublic(posts.get(0).getAuthorId(), loginId, skipAccessability), "a"));
+                                isPublic(posts.get(0).getAuthorId(), loginId, skipAccessability), loginId));
         }
 
         @Override
         public void updatePostById(PostRequest req, String id, String loginId, boolean skipAccessability) {
-                Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", id);
-                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                List<Post> posts = repository.getPostsByAuthorId(Map.ofEntries(entry("id", id)), "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
                         throw new ResourceNotFoundException("Not found post with id: " +
@@ -83,18 +83,15 @@ public class PostServiceImpl extends AbstractService<PostRepository>
                 }
                 validate(req);
                 checkAccessability(loginId, id, skipAccessability);
-                Post post = posts.get(0);
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", id);
-                List<Category> categories = categoryRepository.getCategories(allParams).get();
+                List<Category> categories = categoryRepository
+                                .getCategories(Map.ofEntries(entry("id", req.getCategoryId()))).get();
                 if (categories.size() == 0) {
                         throw new ResourceNotFoundException(
                                         "Not found category with id:" + req.getCategoryId());
                 }
-                post.setTitle(req.getTitle());
-                post.setModified(DateFormat.getCurrentTime());
-                post.setContent(req.getContent());
-                post.setCategoryId(req.getCategoryId());
+                Post post = new Post(posts.get(0).getId(), posts.get(0).getAuthorId(), req.getTitle(), req.getContent(),
+                                posts.get(0).getView(), req.getCategoryId(), posts.get(0).getCreated(),
+                                DateFormat.getCurrentTime(), 0);
                 repository.savePost(post);
 
         }
@@ -102,19 +99,15 @@ public class PostServiceImpl extends AbstractService<PostRepository>
         @Override
         public void addNewPost(PostRequest postRequest, String authorId) {
                 validate(postRequest);
-                Map<String, String> allParams = new HashMap<>();
-                allParams.put("id", postRequest.getCategoryId());
-                List<Category> categories = categoryRepository.getCategories(allParams).get();
+                List<Category> categories = categoryRepository
+                                .getCategories(Map.ofEntries(entry("id", postRequest.getCategoryId()))).get();
                 if (categories.size() == 0) {
                         throw new ResourceNotFoundException(
                                         "Not found category with id:" + postRequest.getCategoryId());
                 }
-                Post post = objectMapper.convertValue(postRequest, Post.class);
-                post.setId(UUID.randomUUID().toString());
-                post.setAuthorId(authorId);
-                post.setCreated(DateFormat.getCurrentTime());
-                post.setDeleted(0);
-                post.setView(0);
+                Post post = new Post(UUID.randomUUID().toString(), authorId, postRequest.getTitle(),
+                                postRequest.getContent(), 0, postRequest.getCategoryId(), DateFormat.getCurrentTime(),
+                                null, 0);
                 accessabilityRepository
                                 .addNewAccessability(new Accessability(null, new ObjectId(authorId), post.getId()));
                 repository.savePost(post);
@@ -122,9 +115,7 @@ public class PostServiceImpl extends AbstractService<PostRepository>
 
         @Override
         public void deletePostById(String id, String loginId, boolean skipAccessability) {
-                Map<String, String> postIds = new HashMap<>();
-                postIds.put("id", id);
-                List<Post> posts = repository.getPostsByAuthorId(postIds, "", 0, 0, "")
+                List<Post> posts = repository.getPostsByAuthorId(Map.ofEntries(entry("id", id)), "", 0, 0, "")
                                 .get();
                 if (posts.size() == 0) {
                         throw new ResourceNotFoundException("Not found post with id: " +
