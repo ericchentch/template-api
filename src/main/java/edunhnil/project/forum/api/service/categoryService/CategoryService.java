@@ -8,13 +8,15 @@ import edunhnil.project.forum.api.dto.categoryDTO.CategoryRequest;
 import edunhnil.project.forum.api.dto.categoryDTO.CategoryResponse;
 
 public interface CategoryService {
-    Optional<List<CategoryResponse>> getCategories(Map<String, String> allParams);
+        Optional<List<CategoryResponse>> getCategories(Map<String, String> allParams, String loginId,
+                        boolean skipAccessability);
 
-    Optional<CategoryResponse> getCategoryById(String id);
+        Optional<CategoryResponse> getCategoryById(String id, String loginId,
+                        boolean skipAccessability);
 
-    void saveCategory(CategoryRequest categoryRequest);
+        void saveCategory(CategoryRequest categoryRequest, String loginId);
 
-    void updateCategory(CategoryRequest categoryRequest, String id);
+        void updateCategory(CategoryRequest categoryRequest, String id, String loginId, boolean skipAccessability);
 
-    void deleteCategory(String id);
+        void deleteCategory(String id, String loginId, boolean skipAccessability);
 }
