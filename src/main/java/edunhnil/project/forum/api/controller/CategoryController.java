@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import edunhnil.project.forum.api.dto.categoryDTO.CategoryRequest;
 import edunhnil.project.forum.api.dto.categoryDTO.CategoryResponse;
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
+import edunhnil.project.forum.api.dto.commonDTO.ValidationResponse;
 import edunhnil.project.forum.api.service.categoryService.CategoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -33,15 +34,17 @@ public class CategoryController extends AbstractController<CategoryService> {
     @GetMapping(value = "/get-list")
     public ResponseEntity<CommonResponse<List<CategoryResponse>>> getCategories(HttpServletRequest request,
             @RequestParam Map<String, String> allParams) {
-        return response(service.getCategories(allParams), "Get list of category successfully!");
+        ValidationResponse result = validateToken(request, true);
+        return response(service.getCategories(allParams, result.getLoginId(), result.isSkipAccessability()),
+                "Get list of category successfully!");
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping(value = "/add-category")
     public ResponseEntity<CommonResponse<String>> addCategory(HttpServletRequest request,
             @RequestBody CategoryRequest categoryRequest) {
-        validateToken(request, false);
-        service.saveCategory(categoryRequest);
+        ValidationResponse result = validateToken(request, false);
+        service.saveCategory(categoryRequest, result.getLoginId());
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(true, "", "Add new category successfully!", HttpStatus.OK.value()),
                 HttpStatus.OK);
@@ -51,8 +54,8 @@ public class CategoryController extends AbstractController<CategoryService> {
     @PutMapping(value = "/update-category")
     public ResponseEntity<CommonResponse<String>> updateCategory(HttpServletRequest request,
             @RequestBody CategoryRequest categoryRequest, @RequestParam(required = true) String id) {
-        validateToken(request, false);
-        service.updateCategory(categoryRequest, id);
+        ValidationResponse result = validateToken(request, false);
+        service.updateCategory(categoryRequest, id, result.getLoginId(), result.isSkipAccessability());
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(true, "", "Update category successfully!", HttpStatus.OK.value()),
                 HttpStatus.OK);
@@ -62,8 +65,8 @@ public class CategoryController extends AbstractController<CategoryService> {
     @DeleteMapping(value = "/delete-category")
     public ResponseEntity<CommonResponse<String>> deleteCategory(HttpServletRequest request,
             @RequestParam(required = true) String id) {
-        validateToken(request, false);
-        service.deleteCategory(id);
+        ValidationResponse result = validateToken(request, false);
+        service.deleteCategory(id, result.getLoginId(), result.isSkipAccessability());
         return new ResponseEntity<CommonResponse<String>>(
                 new CommonResponse<String>(true, "", "Delete category successfully!", HttpStatus.OK.value()),
                 HttpStatus.OK);

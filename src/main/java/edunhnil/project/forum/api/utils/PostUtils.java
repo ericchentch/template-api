@@ -34,7 +34,8 @@ public class PostUtils {
 
         public PostResponse generatePostResponse(Post p, String type, String loginId) {
 
-                Optional<CategoryResponse> categorySerRes = categoryService.getCategoryById(p.getCategoryId());
+                Optional<CategoryResponse> categorySerRes = categoryService.getCategoryById(p.getCategoryId(), loginId,
+                                false);
                 CategoryResponse category = categorySerRes.get();
 
                 Map<String, String> allParams = new HashMap<>();
