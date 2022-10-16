@@ -15,6 +15,8 @@ import edunhnil.project.forum.api.dao.accessabilityRepository.Accessability;
 import edunhnil.project.forum.api.dao.accessabilityRepository.AccessabilityRepository;
 import edunhnil.project.forum.api.dao.fileRepository.File;
 import edunhnil.project.forum.api.dao.fileRepository.FileRepository;
+import edunhnil.project.forum.api.dao.postRepository.Post;
+import edunhnil.project.forum.api.dao.postRepository.PostRepository;
 import edunhnil.project.forum.api.dto.commonDTO.ListWrapperResponse;
 import edunhnil.project.forum.api.dto.fileDTO.FileRequest;
 import edunhnil.project.forum.api.dto.fileDTO.FileResponse;
@@ -32,10 +34,27 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
         @Autowired
         private AccessabilityRepository accessabilityRepository;
 
+        @Autowired
+        private PostRepository postRepository;
+
         @Override
         public void createFile(FileRequest fileRequest, String loginId) {
+                validate(fileRequest);
+                List<Post> posts = postRepository
+                                .getPostsByAuthorId(
+                                                Map.ofEntries(entry("id",
+                                                                generateValueForQuery(fileRequest.getBelongId())),
+                                                                entry("deleted", "0"),
+                                                                entry("authorId", loginId)),
+                                                "", 0, 0, "")
+                                .get();
+                if (posts.size() == 0) {
+                        throw new ResourceNotFoundException("Invalid belong id!");
+                }
                 File file = new File(new ObjectId(), loginId, fileRequest.getTypeFile(), fileRequest.getLinkFile(),
-                                DateFormat.getCurrentTime(), 0);
+                                DateFormat.getCurrentTime(),
+                                posts.stream().map(post -> post.getId()).collect(Collectors.toList()),
+                                0);
                 accessabilityRepository
                                 .addNewAccessability(new Accessability(null, new ObjectId(loginId),
                                                 file.get_id().toString()));
@@ -85,5 +104,16 @@ public class FileServiceImpl extends AbstractService<FileRepository> implements 
                                 .orElseThrow(() -> new ResourceNotFoundException("Not found file with id: " + _id));
                 file.setDeleted(1);
                 repository.saveFile(file);
+        }
+
+        private String generateValueForQuery(List<String> belongIds) {
+                StringBuilder params = new StringBuilder();
+                for (int i = 0; i < belongIds.size(); i++) {
+                        params.append(belongIds.get(i));
+                        if (i != belongIds.size() - 1) {
+                                params.append(",");
+                        }
+                }
+                return params.toString();
         }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -36,6 +37,18 @@ public class FileRepositoryImpl extends AbstractMongoRepository implements FileR
         Query query = generateQueryMongoDB(allParams, File.class, "", "", 0, 0);
         long total = authenticationTemplate.count(query, File.class);
         return total;
+    }
+
+    @Override
+    public Optional<List<File>> getFilesByBelongId(String belongId) {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("belongId").in(belongId));
+            return replaceFind(query, File.class);
+        } catch (IllegalArgumentException e) {
+            APP_LOGGER.error("wrong type user id");
+            return Optional.empty();
+        }
     }
 
 }

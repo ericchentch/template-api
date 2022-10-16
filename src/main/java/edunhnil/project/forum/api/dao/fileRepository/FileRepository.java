@@ -12,5 +12,7 @@ public interface FileRepository {
 
     Optional<File> getFileById(String _id);
 
+    Optional<List<File>> getFilesByBelongId(String belongId);
+
     long getTotal(Map<String, String> allParams);
 }

@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import edunhnil.project.forum.api.constant.DateTime;
+import edunhnil.project.forum.api.dao.fileRepository.FileRepository;
 import edunhnil.project.forum.api.dao.likeRepository.LikeRepository;
 import edunhnil.project.forum.api.dao.postRepository.Post;
 import edunhnil.project.forum.api.dao.userRepository.User;
@@ -31,6 +33,12 @@ public class PostUtils {
 
         @Autowired
         private LikeRepository likeRepository;
+
+        @Autowired
+        private FileRepository fileRepository;
+
+        @Autowired
+        private FileUtils fileUtils;
 
         public PostResponse generatePostResponse(Post p, String type, String loginId) {
 
@@ -60,6 +68,9 @@ public class PostUtils {
                                         p.getView(),
                                         likeRepository.getTotalLike(allParams),
                                         category,
+                                        fileRepository.getFilesByBelongId(p.getId()).get().stream()
+                                                        .map(file -> fileUtils.generateFileResponse(file, type))
+                                                        .collect(Collectors.toList()),
                                         DateFormat.toDateString(p.getCreated(),
                                                         DateTime.YYYY_MM_DD),
                                         DateFormat.toDateString(p.getModified(),
@@ -74,6 +85,9 @@ public class PostUtils {
                                         p.getView(),
                                         likeRepository.getTotalLike(allParams),
                                         category,
+                                        fileRepository.getFilesByBelongId(p.getId()).get().stream()
+                                                        .map(file -> fileUtils.generateFileResponse(file, type))
+                                                        .collect(Collectors.toList()),
                                         DateFormat.toDateString(p.getCreated(),
                                                         DateTime.YYYY_MM_DD),
                                         DateFormat.toDateString(p.getModified(),
