@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.dto.fileDTO;
 
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -25,4 +27,6 @@ public class FileRequest {
     @NotBlank(message = "Link is required")
     @NotNull(message = "Link is required")
     private String linkFile;
+
+    private List<String> belongId;
 }

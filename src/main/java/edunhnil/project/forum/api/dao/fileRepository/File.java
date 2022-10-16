@@ -1,6 +1,7 @@
 package edunhnil.project.forum.api.dao.fileRepository;
 
 import java.util.Date;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,5 +20,6 @@ public class File {
     private String typeFile;
     private String linkFile;
     private Date createdAt;
+    private List<String> belongId;
     private int deleted;
 }

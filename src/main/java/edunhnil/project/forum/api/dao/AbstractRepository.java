@@ -34,6 +34,12 @@ public abstract class AbstractRepository {
 
     protected boolean isFirstCondition = true;
 
+    protected int hasAnd = 0;
+
+    protected int counting = 0;
+
+    protected int maxLength = 0;
+
     protected <T> Optional<List<T>> replaceQuery(String sql, Class<T> clazz) {
         try {
             List<T> list = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(clazz));
@@ -186,9 +192,9 @@ public abstract class AbstractRepository {
             isFirstCondition = false;
             return " WHERE ";
         }
-        if (type == "date")
-            return " OR ";
-        return " AND ";
+        if (hasAnd > 1 && counting != maxLength - 1)
+            return " AND ";
+        return " OR ";
     }
 
     protected String generateConditionInQuery(Field field, String value) {
@@ -241,21 +247,31 @@ public abstract class AbstractRepository {
         Field[] fields = clazz.getDeclaredFields();
         StringBuilder result = new StringBuilder();
         for (Map.Entry<String, String> items : allParams.entrySet()) {
+            maxLength = fields.length;
+            for (Field field : fields) {
+                if (field.getName().compareTo(items.getKey()) == 0) {
+                    hasAnd++;
+                }
+            }
             for (Field field : fields) {
                 if (field.getName().compareTo(items.getKey()) == 0) {
                     String[] values = items.getValue().split(",");
-                    if (field.getType() == Date.class) {
-                        result.append(generateDateCondition(field, values));
-                    } else {
-                        for (int i = 0; i < values.length; i++) {
-                            result.append(generateConditionInQuery(field, values[i]));
-                            if (i != values.length - 1)
-                                result.append(" OR ");
+                    if (values.length != 0) {
+                        if (field.getType() == Date.class) {
+                            result.append(generateDateCondition(field, values));
+                        } else {
+                            for (int i = 0; i < values.length; i++) {
+                                result.append(generateConditionInQuery(field, values[i]));
+                            }
                         }
                     }
                 }
             }
+            counting++;
         }
+        counting = 0;
+        hasAnd = 0;
+        maxLength = 0;
         isFirstCondition = true;
         if (keySort.trim().compareTo("") != 0 && sortField.trim().compareTo("") != 0) {
             result.append(" ORDER BY ").append(StringUtils.camelCaseToSnakeCase(sortField)).append(" ").append(keySort);
