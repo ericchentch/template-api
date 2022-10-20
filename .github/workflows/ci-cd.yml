@@ -1,4 +1,4 @@
-name: forum-api CI/CD work-flow
+name: template-api CI/CD work-flow
 
 env:
   POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL_GITFORUM }}
