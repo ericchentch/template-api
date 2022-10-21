@@ -2,7 +2,6 @@ package edunhnil.project.forum.api.service.loginService;
 
 import static java.util.Map.entry;
 
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -91,11 +90,11 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             return Optional.of(new LoginResponse("", "", true));
         } else {
             String jwt = jwtTokenProvider.generateToken(user.get_id().toString());
-            List<String> tokens = user.getTokens();
+            Map<String, String> tokens = user.getTokens();
             if (tokens == null) {
-                user.setTokens(Arrays.asList(jwt));
+                user.setTokens(Map.ofEntries(entry(loginRequest.getDeviceId(), jwt)));
             } else {
-                tokens.add(jwt);
+                tokens.put(loginRequest.getDeviceId(), jwt);
             }
             repository.insertAndUpdate(user);
             return Optional.of(new LoginResponse(jwt, user.get_id().toString(), false));
@@ -103,14 +102,14 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
     }
 
     @Override
-    public void logout(String id, String token) {
+    public void logout(String id, String deviceId) {
         List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
         if (users.size() == 0) {
             throw new ResourceNotFoundException("Not found user!");
         }
         User user = users.get(0);
         if (user.getTokens() != null) {
-            user.getTokens().remove(token);
+            user.getTokens().remove(deviceId);
         }
         repository.insertAndUpdate(user);
     }

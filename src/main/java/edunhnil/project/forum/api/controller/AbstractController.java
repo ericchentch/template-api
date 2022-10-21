@@ -48,8 +48,8 @@ public abstract class AbstractController<s> {
             String token = JwtUtils.getJwtFromRequest(request);
             User user = tokenProvider.getUserInfoFromToken(token)
                     .orElseThrow(() -> new UnauthorizedException("User are deactivated or deleted!"));
-            if (user.getTokens().stream().filter(saveToken -> saveToken.compareTo(token) == 0)
-                    .collect(Collectors.toList()).size() != 0) {
+            if (user.getTokens().entrySet().stream().filter(item -> item.getValue().compareTo(token) == 0)
+                    .collect(Collectors.toSet()).size() == 0) {
                 throw new UnauthorizedException("Unauthorized");
             }
             List<Feature> feature = featureRepository

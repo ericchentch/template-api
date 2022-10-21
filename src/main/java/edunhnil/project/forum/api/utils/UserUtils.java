@@ -1,7 +1,5 @@
 package edunhnil.project.forum.api.utils;
 
-import java.util.ArrayList;
-
 import org.springframework.stereotype.Component;
 
 import edunhnil.project.forum.api.constant.DateTime;
@@ -23,7 +21,7 @@ public class UserUtils {
                     user.getLastName(),
                     "",
                     "",
-                    new ArrayList<>(),
+                    null,
                     false,
                     false,
                     "",
