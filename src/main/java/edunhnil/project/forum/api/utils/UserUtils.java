@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.utils;
 
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Component;
 
 import edunhnil.project.forum.api.constant.DateTime;
@@ -21,7 +23,7 @@ public class UserUtils {
                     user.getLastName(),
                     "",
                     "",
-                    "",
+                    new ArrayList<>(),
                     false,
                     false,
                     "",
@@ -38,7 +40,7 @@ public class UserUtils {
                     user.getLastName(),
                     user.getEmail(),
                     user.getPhone(),
-                    user.getToken(),
+                    user.getTokens(),
                     user.isVerified(),
                     user.isVerify2FA(),
                     DateFormat.toDateString(user.getCreated(), DateTime.YYYY_MM_DD),

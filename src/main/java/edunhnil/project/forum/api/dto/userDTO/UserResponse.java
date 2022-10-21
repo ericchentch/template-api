@@ -1,5 +1,7 @@
 package edunhnil.project.forum.api.dto.userDTO;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +20,7 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String phone;
-    private String token;
+    private List<String> tokens;
     private boolean isVerify;
     private boolean is2FAVerify;
     private String created;

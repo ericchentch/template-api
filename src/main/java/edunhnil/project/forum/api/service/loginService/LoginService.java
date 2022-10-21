@@ -9,7 +9,7 @@ import edunhnil.project.forum.api.dto.loginDTO.RegisterRequest;
 public interface LoginService {
     Optional<LoginResponse> login(LoginRequest loginRequest, boolean isRegister);
 
-    void logout(String id);
+    void logout(String id, String token);
 
     void register(RegisterRequest RegisterRequest);
 

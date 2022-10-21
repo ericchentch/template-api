@@ -1,6 +1,7 @@
 package edunhnil.project.forum.api.dao.userRepository;
 
 import java.util.Date;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -24,12 +25,10 @@ public class User {
     private String lastName;
     private String email;
     private String phone;
-    private String token;
+    private List<String> tokens;
     private Date created;
     private Date modified;
-    private String code;
     private boolean verified;
     private boolean verify2FA;
-    private Date verifyTime;
     private int deleted;
 }

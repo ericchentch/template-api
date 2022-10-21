@@ -72,7 +72,7 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                 String passwordEncode = bCryptPasswordEncoder().encode(userRequest.getPassword());
                 userRequest.setPassword(passwordEncode);
                 User user = objectMapper.convertValue(userRequest, User.class);
-                user.setToken("");
+                user.setTokens(null);
                 user.setCreated(DateFormat.getCurrentTime());
                 user.setModified(null);
                 repository.insertAndUpdate(user);
@@ -89,7 +89,7 @@ public class UserServiceImpl extends AbstractService<UserRepository>
                 checkAccessability(loginId, id, skipAccessability);
                 PasswordValidator.validateNewPassword(userRequest.getPassword());
                 User user = objectMapper.convertValue(userRequest, User.class);
-                user.setToken(oldUser.getToken());
+                user.setTokens(oldUser.getTokens());
                 user.setCreated(oldUser.getCreated());
                 user.setModified(DateFormat.getCurrentTime());
                 repository.insertAndUpdate(user);
