@@ -5,6 +5,7 @@ import static java.util.Map.entry;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -47,7 +48,8 @@ public abstract class AbstractController<s> {
             String token = JwtUtils.getJwtFromRequest(request);
             User user = tokenProvider.getUserInfoFromToken(token)
                     .orElseThrow(() -> new UnauthorizedException("User are deactivated or deleted!"));
-            if (user.getToken().compareTo(token) != 0) {
+            if (user.getTokens().entrySet().stream().filter(item -> item.getValue().compareTo(token) == 0)
+                    .collect(Collectors.toSet()).size() == 0) {
                 throw new UnauthorizedException("Unauthorized");
             }
             List<Feature> feature = featureRepository

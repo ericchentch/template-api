@@ -63,8 +63,8 @@ public class EndpointsListener implements ApplicationListener<ContextRefreshedEv
         List<User> users = userRepository.getUsers(userParams, "", 0, 0, "").get();
         if (users.size() == 0) {
             User user = new User(null, "super_admin", "$2a$12$d6aWvOFKgqCVIaYJc9YkDu0y.wK8reuZXLwoUjgnNOP9YujICIHLm", 0,
-                    "", "", "Super", "Admin", email, "", "",
-                    DateFormat.getCurrentTime(), null, "", true, false, null, 0);
+                    "", "", "Super", "Admin", email, "", null, DateFormat.getCurrentTime(), null, true, false,
+                    0);
             userRepository.insertAndUpdate(user);
         }
         User user = users.get(0);

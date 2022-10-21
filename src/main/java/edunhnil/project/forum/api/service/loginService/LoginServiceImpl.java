@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edunhnil.project.forum.api.constant.FormInput;
+import edunhnil.project.forum.api.dao.codeRepository.Code;
+import edunhnil.project.forum.api.dao.codeRepository.CodeRepository;
 import edunhnil.project.forum.api.dao.userRepository.User;
 import edunhnil.project.forum.api.dao.userRepository.UserRepository;
 import edunhnil.project.forum.api.dto.loginDTO.LoginRequest;
@@ -35,6 +37,9 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private CodeRepository codeRepository;
 
     @Override
     public Optional<LoginResponse> login(LoginRequest loginRequest, boolean isRegister) {
@@ -72,26 +77,40 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
                             "2FA code from forum-api"));
             Date now = new Date();
             Date expiredDate = new Date(now.getTime() + 5 * 60 * 1000L);
-            user.setVerifyTime(expiredDate);
-            user.setCode(verify2FACode);
-            repository.insertAndUpdate(user);
+            Optional<List<Code>> codes = codeRepository.getCodesByType(user.get_id().toString(), "verify2FA");
+            if (codes.isPresent()) {
+                Code code = codes.get().get(0);
+                code.setCode(verify2FACode);
+                code.setExpiredDate(expiredDate);
+                codeRepository.insertAndUpdateCode(code);
+            } else {
+                Code code = new Code(null, user.get_id(), "verify2FA", verify2FACode, expiredDate);
+                codeRepository.insertAndUpdateCode(code);
+            }
             return Optional.of(new LoginResponse("", "", true));
         } else {
             String jwt = jwtTokenProvider.generateToken(user.get_id().toString());
-            user.setToken(jwt);
+            Map<String, String> tokens = user.getTokens();
+            if (tokens == null) {
+                user.setTokens(Map.ofEntries(entry(loginRequest.getDeviceId(), jwt)));
+            } else {
+                tokens.put(loginRequest.getDeviceId(), jwt);
+            }
             repository.insertAndUpdate(user);
             return Optional.of(new LoginResponse(jwt, user.get_id().toString(), false));
         }
     }
 
     @Override
-    public void logout(String id) {
+    public void logout(String id, String deviceId) {
         List<User> users = repository.getUsers(Map.ofEntries(entry("_id", id)), "", 0, 0, "").get();
         if (users.size() == 0) {
             throw new ResourceNotFoundException("Not found user!");
         }
         User user = users.get(0);
-        user.setToken("");
+        if (user.getTokens() != null) {
+            user.getTokens().remove(deviceId);
+        }
         repository.insertAndUpdate(user);
     }
 
@@ -117,19 +136,27 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             String passwordEncode = bCryptPasswordEncoder().encode(registerRequest.getPassword());
             User user = objectMapper.convertValue(registerRequest, User.class);
             user.setPassword(passwordEncode);
-            user.setToken("");
-            user.setCode(CodeGenerator.userCodeGenerator());
+            user.setTokens(null);
+            String newCode = CodeGenerator.userCodeGenerator();
             Date now = new Date();
             Date expiredDate = new Date(now.getTime() + 5 * 60 * 1000L);
-            user.setVerifyTime(expiredDate);
-            repository.insertAndUpdate(user);
+            Optional<List<Code>> codes = codeRepository.getCodesByType(user.get_id().toString(), "register");
+            if (codes.isPresent()) {
+                Code code = codes.get().get(0);
+                code.setCode(newCode);
+                code.setExpiredDate(expiredDate);
+                codeRepository.insertAndUpdateCode(code);
+            } else {
+                Code code = new Code(null, user.get_id(), "register", newCode, expiredDate);
+                codeRepository.insertAndUpdateCode(code);
+            }
             emailService
-                    .sendSimpleMail(new EmailDetail(user.getEmail(), user.getCode(), "Sign up code from forum-api"));
+                    .sendSimpleMail(new EmailDetail(user.getEmail(), newCode, "Sign up code from forum-api"));
         }
     }
 
     @Override
-    public void verifyRegister(String code, String email) {
+    public void verifyRegister(String inputCode, String email) {
         User user = new User();
         if (email.matches(FormInput.EMAIL)) {
             List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
@@ -144,12 +171,17 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             }
         }
         Date now = new Date();
-        if (user.getCode().compareTo(code) != 0)
+        Optional<List<Code>> codes = codeRepository.getCodesByType(user.get_id().toString(), "verifyRegister");
+        if (codes.isPresent()) {
+            Code code = codes.get().get(0);
+            if (code.getCode().compareTo(inputCode) != 0)
+                throw new InvalidRequestException("This code is invalid");
+            else if (code.getExpiredDate().compareTo(now) < 0) {
+                throw new InvalidRequestException("Code is expired");
+            }
+        } else {
             throw new InvalidRequestException("This code is invalid");
-        else if (user.getVerifyTime().compareTo(now) < 0) {
-            throw new InvalidRequestException("Code is expired");
         }
-        user.setCode("");
         user.setVerified(true);
         repository.insertAndUpdate(user);
     }
@@ -161,13 +193,21 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             throw new ResourceNotFoundException("Not found user with email: " + email);
         }
         User userCheckMail = users.get(0);
-        userCheckMail.setCode(CodeGenerator.userCodeGenerator());
+        String newCode = CodeGenerator.userCodeGenerator();
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + 5 * 60 * 1000L);
-        userCheckMail.setVerifyTime(expiredDate);
-        repository.insertAndUpdate(userCheckMail);
+        Optional<List<Code>> codes = codeRepository.getCodesByType(userCheckMail.get_id().toString(), "verifyRegister");
+        if (codes.isPresent()) {
+            Code code = codes.get().get(0);
+            code.setCode(newCode);
+            code.setExpiredDate(expiredDate);
+            codeRepository.insertAndUpdateCode(code);
+        } else {
+            Code code = new Code(null, userCheckMail.get_id(), "verifyRegister", newCode, expiredDate);
+            codeRepository.insertAndUpdateCode(code);
+        }
         emailService
-                .sendSimpleMail(new EmailDetail(userCheckMail.getEmail(), userCheckMail.getCode(),
+                .sendSimpleMail(new EmailDetail(userCheckMail.getEmail(), newCode,
                         "Sign up code from forum-api"));
 
     }
@@ -190,7 +230,7 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
     }
 
     @Override
-    public Optional<LoginResponse> verify2FA(String email, String code) {
+    public Optional<LoginResponse> verify2FA(String email, String inputCode) {
         User user = new User();
         if (email.matches(FormInput.EMAIL)) {
             List<User> users = repository.getUsers(Map.ofEntries(entry("email", email)), "", 0, 0, "").get();
@@ -207,14 +247,18 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             user = users.get(0);
         }
         Date now = new Date();
-        if (user.getCode().compareTo(code) != 0)
+        Optional<List<Code>> codes = codeRepository.getCodesByType(user.get_id().toString(), "verify2FA");
+        if (codes.isPresent()) {
+            Code code = codes.get().get(0);
+            if (code.getCode().compareTo(inputCode) != 0)
+                throw new InvalidRequestException("This code is invalid");
+            else if (code.getExpiredDate().compareTo(now) < 0) {
+                throw new InvalidRequestException("Code is expired");
+            }
+        } else {
             throw new InvalidRequestException("This code is invalid");
-        else if (user.getVerifyTime().compareTo(now) < 0) {
-            throw new InvalidRequestException("Code is expired");
         }
         String jwt = jwtTokenProvider.generateToken(user.get_id().toString());
-        user.setToken(jwt);
-        repository.insertAndUpdate(user);
         return Optional.of(new LoginResponse(jwt, user.get_id().toString(), true));
     }
 
@@ -225,13 +269,21 @@ public class LoginServiceImpl extends AbstractService<UserRepository>
             throw new ResourceNotFoundException("Not found user with email: " + email);
         }
         User userCheckMail = users.get(0);
-        userCheckMail.setCode(CodeGenerator.userCodeGenerator());
+        String newCode = CodeGenerator.userCodeGenerator();
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + 5 * 60 * 1000L);
-        userCheckMail.setVerifyTime(expiredDate);
-        repository.insertAndUpdate(userCheckMail);
+        Optional<List<Code>> codes = codeRepository.getCodesByType(userCheckMail.get_id().toString(), "verify2FA");
+        if (codes.isPresent()) {
+            Code code = codes.get().get(0);
+            code.setCode(newCode);
+            code.setExpiredDate(expiredDate);
+            codeRepository.insertAndUpdateCode(code);
+        } else {
+            Code code = new Code(null, userCheckMail.get_id(), "verify2FA", newCode, expiredDate);
+            codeRepository.insertAndUpdateCode(code);
+        }
         emailService
-                .sendSimpleMail(new EmailDetail(userCheckMail.getEmail(), userCheckMail.getCode(),
+                .sendSimpleMail(new EmailDetail(userCheckMail.getEmail(), newCode,
                         "Verify 2FA code from forum-api"));
     }
 

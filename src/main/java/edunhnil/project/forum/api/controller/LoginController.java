@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edunhnil.project.forum.api.dto.commonDTO.CommonResponse;
+import edunhnil.project.forum.api.dto.commonDTO.ValidationResponse;
 import edunhnil.project.forum.api.dto.loginDTO.LoginRequest;
 import edunhnil.project.forum.api.dto.loginDTO.LoginResponse;
 import edunhnil.project.forum.api.dto.loginDTO.RegisterRequest;
@@ -33,9 +34,10 @@ public class LoginController extends AbstractController<LoginService> {
 
         @SecurityRequirement(name = "Bearer Authentication")
         @PostMapping(value = "logout")
-        public ResponseEntity<CommonResponse<String>> logout(HttpServletRequest request) {
-                String id = validateToken(request, false).getLoginId();
-                service.logout(id);
+        public ResponseEntity<CommonResponse<String>> logout(HttpServletRequest request,
+                        @RequestParam(required = true) String deviceId) {
+                ValidationResponse result = validateToken(request, false);
+                service.logout(result.getLoginId(), deviceId);
                 return new ResponseEntity<CommonResponse<String>>(
                                 new CommonResponse<String>(true, null, "Logout successfully!",
                                                 HttpStatus.OK.value()),

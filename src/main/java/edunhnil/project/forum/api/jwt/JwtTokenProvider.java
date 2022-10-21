@@ -37,9 +37,8 @@ public class JwtTokenProvider {
 
     public String generateToken(String id) {
         Date now = new Date();
-        long JWT_EXPIRATION = 24 * 60 * 60 * 1000L; // expired in 1 days since login
+        long JWT_EXPIRATION = 7 * 24 * 60 * 60 * 1000L; // expired in 7 days since login
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
-        System.out.println(JWT_SECRET);
         return Jwts.builder()
                 .setSubject(id)
                 .setIssuedAt(now)
